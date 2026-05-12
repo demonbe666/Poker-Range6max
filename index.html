@@ -1,214 +1,197 @@
 <!DOCTYPE html>
-<!-- saved from url=(0058)file:///C:/Users/Admin/Downloads/poker-range-viewer_5.html -->
-<html lang="th"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-
+<html lang="th">
+<head>
+<meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>6-Max Preflop Range Viewer</title>
+<title>6-Max Preflop Ranges</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap');
 :root{
-  --bg:#0e0f11;--surface:#161819;--surface2:#1e2022;--border:#2a2d30;
-  --text:#e8eaec;--muted:#7a8088;--dim:#444950;--accent:#4a9eff;
-  --r:#3d7fd4;--c:#1d8a5e;--b3:#c47d1a;--b4:#a83232;--f:#555b63;
-  --r-l:#5ba3ff;--c-l:#25b07a;--b3-l:#e09930;--b4-l:#d44040;--f-l:#7a8490;
+  --bg:#0e0f11;--sur:#161819;--sur2:#1e2022;--bor:#2a2d30;
+  --tx:#e8eaec;--mu:#7a8088;--di:#444950;--ac:#4a9eff;
+  --cr:#3d7fd4;--cc:#1d8a5e;--c3:#c47d1a;--c4:#a83232;--c5:#8b2fc9;--cf:#555b63;
   --cell:42px;--gap:2px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
-body{background:var(--bg);color:var(--text);font-family:'IBM Plex Sans Thai',sans-serif;min-height:100vh;padding:16px}
-header{display:flex;align-items:baseline;gap:12px;margin-bottom:16px;padding-bottom:12px;border-bottom:1px solid var(--border)}
-header h1{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;letter-spacing:-.5px}
-header span{font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.layout{display:flex;gap:16px;align-items:flex-start}
-.sidebar{width:200px;flex-shrink:0;display:flex;flex-direction:column;gap:14px}
-.sec-label{font-size:10px;font-family:'JetBrains Mono',monospace;letter-spacing:1.5px;color:var(--dim);text-transform:uppercase;margin-bottom:5px}
-.spot-group{margin-bottom:8px}
-.group-label{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--accent);letter-spacing:1px;text-transform:uppercase;padding:4px 8px;margin-bottom:2px}
-.spot-btn{width:100%;text-align:left;padding:5px 10px;font-size:11px;font-family:'JetBrains Mono',monospace;background:transparent;border:1px solid transparent;border-radius:5px;color:var(--muted);cursor:pointer;transition:all .12s;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.spot-btn:hover{background:var(--surface2);color:var(--text)}
-.spot-btn.active{background:var(--surface2);border-color:var(--border);color:var(--text)}
-.spot-btn.active::before{content:'▶ ';color:var(--accent);font-size:8px}
-.act-row{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:5px;cursor:pointer;border:1px solid transparent;transition:all .12s}
-.act-row:hover{background:var(--surface2)}
-.act-row.active{background:var(--surface2);border-color:var(--border)}
-.act-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
-.act-name{font-size:11px}
-.hint-box{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:9px 11px;font-size:10px;color:var(--muted);line-height:1.8}
-.hint-box strong{color:var(--text);font-weight:500}
-.save-btns{display:flex;flex-direction:column;gap:3px}
-.sbtn{padding:6px 10px;font-size:11px;font-family:'IBM Plex Sans Thai',sans-serif;border-radius:5px;cursor:pointer;border:1px solid var(--border);background:var(--surface);color:var(--text);transition:all .12s;text-align:center}
-.sbtn:hover{background:var(--surface2);border-color:#444}
-.sbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
-.sbtn.primary:hover{background:#5aaeff}
-.sbtn.danger{color:#d44;border-color:#3a2020}
-.sbtn.danger:hover{background:#1e1515}
-.save-status{font-size:10px;color:var(--c-l);font-family:'JetBrains Mono',monospace;min-height:14px;text-align:center;margin-top:2px}
-.main{flex:1;min-width:0}
-.info-strip{display:flex;gap:12px;font-size:11px;color:var(--muted);font-family:'JetBrains Mono',monospace;flex-wrap:wrap;margin-bottom:8px}
-.info-strip span{color:var(--text)}
-.rank-header{display:grid;grid-template-columns:repeat(13,var(--cell));gap:var(--gap);margin-bottom:var(--gap)}
-.rank-lbl{width:var(--cell);text-align:center;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--dim)}
-.grid-wrap{display:flex;gap:var(--gap)}
-.rank-col{display:flex;flex-direction:column;gap:var(--gap)}
-.rank-side-lbl{height:var(--cell);width:16px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--dim)}
+body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
+.topbar{display:flex;align-items:center;gap:0;border-bottom:1px solid var(--bor);flex-shrink:0;height:44px;padding:0 14px}
+.topbar-title{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;letter-spacing:-.3px;margin-right:16px;white-space:nowrap;color:var(--tx)}
+.breadcrumb{display:flex;align-items:center;gap:4px;font-size:11px;font-family:'JetBrains Mono',monospace;flex:1;overflow:hidden;min-width:0}
+.bc-item{color:var(--mu);white-space:nowrap;padding:2px 5px;border-radius:3px}
+.bc-item.active{color:var(--tx)}
+.bc-sep{color:var(--di);font-size:10px}
+.topbar-right{display:flex;gap:5px;align-items:center;flex-shrink:0;margin-left:10px}
+.tbtn{font-size:11px;padding:4px 9px;border:1px solid var(--bor);border-radius:5px;background:var(--sur);color:var(--tx);cursor:pointer;transition:all .12s;white-space:nowrap;font-family:'IBM Plex Sans Thai',sans-serif}
+.tbtn:hover{background:var(--sur2);border-color:#444}
+.tbtn.gto{background:#1a3a1a;border-color:#2d6e2d;color:#4caf50;font-weight:500}
+.tbtn.gto:hover{background:#1f451f}
+.tbtn.red{color:#d44;border-color:#3a2020}
+.tbtn.red:hover{background:#1e1515}
+.ss{font-size:10px;color:#25b07a;font-family:'JetBrains Mono',monospace;min-width:50px}
+.body{display:flex;flex:1;overflow:hidden}
+.nav{width:230px;flex-shrink:0;border-right:1px solid var(--bor);display:flex;flex-direction:column;overflow:hidden}
+.nav-scroll{flex:1;overflow-y:auto;padding:8px 6px}
+.nav-scroll::-webkit-scrollbar{width:3px}
+.nav-scroll::-webkit-scrollbar-thumb{background:var(--bor);border-radius:2px}
+.tg{margin-bottom:3px}
+.th{display:flex;align-items:center;gap:5px;padding:6px 8px;border-radius:6px;cursor:pointer;transition:background .12s;user-select:none}
+.th:hover,.th.open{background:var(--sur2)}
+.chev{font-size:8px;color:var(--mu);transition:transform .18s;width:10px;flex-shrink:0;display:inline-block}
+.chev.o{transform:rotate(90deg)}
+.tico{font-size:12px;flex-shrink:0}
+.tlbl{font-size:12px;font-weight:500;color:var(--tx);flex:1}
+.tc{margin-left:14px;border-left:1px solid var(--bor);padding-left:6px;overflow:hidden;max-height:0;transition:max-height .22s ease}
+.tc.o{max-height:1000px}
+.sg{margin-bottom:1px}
+.sh{display:flex;align-items:center;gap:4px;padding:4px 6px;border-radius:5px;cursor:pointer;transition:background .12s;user-select:none}
+.sh:hover,.sh.open{background:var(--sur2)}
+.slbl{font-size:11px;color:var(--mu);flex:1}
+.slbl.hd{color:#888}
+.schev{font-size:7px;color:var(--di);transition:transform .16s;width:8px;flex-shrink:0}
+.schev.o{transform:rotate(90deg)}
+.spots{margin-left:10px;border-left:1px solid var(--bor);padding-left:5px;overflow:hidden;max-height:0;transition:max-height .18s ease}
+.spots.o{max-height:800px}
+.si{display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--mu);transition:all .1s}
+.si:hover{background:var(--sur2);color:var(--tx)}
+.si.active{background:var(--sur2);color:var(--tx);border-left:2px solid var(--ac);padding-left:4px}
+.si.hd{color:#666}
+.si.active{color:var(--tx)}
+.sdot{width:5px;height:5px;border-radius:50%;background:var(--di);flex-shrink:0}
+.sdot.f{background:#25b07a}
+.nav-bot{padding:8px 6px;border-top:1px solid var(--bor);flex-shrink:0}
+.ql{font-size:9px;color:var(--di);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
+.qa{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:pointer;border:1px solid transparent;transition:all .1s}
+.qa:hover{background:var(--sur2)}
+.qa.active{background:var(--sur2);border-color:var(--bor)}
+.qadot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.qaname{font-size:11px;color:var(--mu)}
+.qa.active .qaname{color:var(--tx)}
+.main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
+.main::-webkit-scrollbar{width:4px}
+.main::-webkit-scrollbar-thumb{background:var(--bor);border-radius:2px}
+.welcome{display:flex;flex-direction:column;align-items:center;justify-content:center;flex:1;gap:10px;color:var(--mu)}
+.wt{font-size:16px;font-weight:500;color:var(--tx);font-family:'JetBrains Mono',monospace}
+.wsub{font-size:11px;line-height:1.9;text-align:center;font-family:'JetBrains Mono',monospace}
+.spot-hdr{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.spot-name{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600}
+.spot-stats{display:flex;gap:10px;font-size:11px;color:var(--mu);font-family:'JetBrains Mono',monospace;flex-wrap:wrap}
+.spot-stats span{color:var(--tx)}
+.hint{font-size:10px;color:var(--di);font-family:'JetBrains Mono',monospace}
+.rh{display:grid;grid-template-columns:repeat(13,var(--cell));gap:var(--gap);margin-bottom:var(--gap);padding-left:18px}
+.rl{text-align:center;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--di)}
+.gw{display:flex;gap:var(--gap)}
+.rc{display:flex;flex-direction:column;gap:var(--gap)}
+.rsl{height:var(--cell);width:16px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--di)}
 .grid{display:grid;grid-template-columns:repeat(13,var(--cell));gap:var(--gap)}
-.cell{width:var(--cell);height:var(--cell);position:relative;border-radius:3px;cursor:pointer;overflow:hidden;background:var(--surface);border:1px solid var(--border);transition:transform .08s,filter .08s;user-select:none}
+.cell{width:var(--cell);height:var(--cell);position:relative;border-radius:3px;cursor:pointer;overflow:hidden;background:var(--sur);border:1px solid var(--bor);user-select:none;transition:transform .08s,filter .08s}
 .cell:hover{transform:scale(1.1);filter:brightness(1.15);z-index:10}
 .cell svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.cell-label{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-family:'JetBrains Mono',monospace;font-weight:600;color:rgba(255,255,255,.92);pointer-events:none;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.9);letter-spacing:-.3px}
-.legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:10px;color:var(--muted);font-family:'JetBrains Mono',monospace}
-.leg-item{display:flex;align-items:center;gap:4px}
-.leg-dot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-/* sidebar scroll */
-.spot-scroll{max-height:calc(100vh - 320px);overflow-y:auto;padding-right:2px}
-.spot-scroll::-webkit-scrollbar{width:3px}
-.spot-scroll::-webkit-scrollbar-track{background:transparent}
-.spot-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
-/* Modal */
+.cl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-family:'JetBrains Mono',monospace;font-weight:600;color:rgba(255,255,255,.92);pointer-events:none;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.9);letter-spacing:-.3px}
+.leg{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--mu);font-family:'JetBrains Mono',monospace}
+.li{display:flex;align-items:center;gap:4px}
+.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;align-items:center;justify-content:center;z-index:200;backdrop-filter:blur(3px)}
 .overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;width:320px;max-width:95vw}
-.modal-title{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;margin-bottom:3px}
-.modal-sub{font-size:11px;color:var(--muted);margin-bottom:14px}
-.freq-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.freq-row label{display:flex;align-items:center;gap:5px;font-size:11px;width:96px;flex-shrink:0}
-.freq-row input[type=range]{flex:1;accent-color:var(--accent);cursor:pointer}
-.freq-val{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;min-width:34px;text-align:right}
-.total-bar{height:5px;border-radius:3px;background:var(--surface2);margin-bottom:6px;overflow:hidden;display:flex}
-.total-seg{height:100%}
-.freq-total{font-size:11px;font-family:'JetBrains Mono',monospace;margin-bottom:14px;padding:7px 9px;border-radius:5px;background:var(--surface2)}
-.freq-total.ok{color:var(--c-l)}.freq-total.over{color:var(--b4-l)}.freq-total.under{color:var(--muted)}
-.modal-btns{display:flex;gap:7px;justify-content:flex-end}
-.mbtn{padding:6px 14px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border-radius:5px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);color:var(--text);transition:all .12s}
-.mbtn:hover{border-color:#444}
-.mbtn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:500}
-.mbtn.primary:hover{background:#5aaeff}
-.mbtn.clear-btn{color:var(--b4-l);border-color:#3a2020}
-.mbtn.clear-btn:hover{background:#1e1515}
+.modal{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;width:310px;max-width:95vw}
+.mt{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:600;margin-bottom:3px}
+.ms{font-size:11px;color:var(--mu);margin-bottom:13px}
+.fr{display:flex;align-items:center;gap:7px;margin-bottom:9px}
+.fr label{display:flex;align-items:center;gap:5px;font-size:11px;width:94px;flex-shrink:0}
+.fr input[type=range]{flex:1;accent-color:var(--ac);cursor:pointer}
+.fv{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;min-width:32px;text-align:right}
+.tb{height:5px;border-radius:3px;background:var(--sur2);margin-bottom:5px;overflow:hidden;display:flex}
+.ts{height:100%}
+.ft{font-size:11px;font-family:'JetBrains Mono',monospace;margin-bottom:13px;padding:6px 9px;border-radius:5px;background:var(--sur2)}
+.ft.ok{color:#25b07a}.ft.over{color:#d44040}.ft.under{color:var(--mu)}
+.mbtns{display:flex;gap:6px;justify-content:flex-end}
+.mb{padding:5px 13px;font-size:12px;font-family:'IBM Plex Sans Thai',sans-serif;border-radius:5px;cursor:pointer;border:1px solid var(--bor);background:var(--sur2);color:var(--tx);transition:all .12s}
+.mb:hover{border-color:#444}
+.mb.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:500}
+.mb.p:hover{background:#5aaeff}
+.mb.d{color:#d44;border-color:#3a2020}
+.mb.d:hover{background:#1e1515}
+.go{position:fixed;inset:0;background:rgba(0,0,0,.8);display:none;align-items:center;justify-content:center;z-index:300;backdrop-filter:blur(3px)}
+.go.open{display:flex}
+.gm{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:18px;width:480px;max-width:96vw}
+.gm h3{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;margin-bottom:4px}
+.gsub{font-size:11px;color:var(--mu);margin-bottom:10px;line-height:1.6}
+.gsub code{background:var(--sur2);padding:1px 5px;border-radius:3px;font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--ac)}
+.gap{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px}
+.gta{width:100%;height:90px;background:var(--sur2);border:1px solid var(--bor);border-radius:5px;color:var(--tx);padding:7px;font-family:'JetBrains Mono',monospace;font-size:10px;resize:vertical;margin-bottom:7px;outline:none}
+.gta:focus{border-color:var(--ac)}
+.gpv{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);min-height:13px;margin-bottom:9px}
+.gpv.ok{color:#25b07a}.gpv.err{color:#d44040}
+.gbtns{display:flex;gap:6px;justify-content:flex-end}
 </style>
 </head>
 <body>
-<header>
-  <h1>6-MAX RANGE VIEWER</h1>
-  <span>preflop — all spots</span>
-</header>
-<div class="layout">
-  <div class="sidebar">
-    <div>
-      <div class="sec-label">Spots</div>
-      <div class="spot-scroll" id="spotList"><div class="spot-group"><div class="group-label">RFI (Open)</div><button class="spot-btn active" title="RFI UTG">RFI UTG</button><button class="spot-btn" title="RFI HJ">RFI HJ</button><button class="spot-btn" title="RFI CO">RFI CO</button><button class="spot-btn" title="RFI BTN">RFI BTN</button><button class="spot-btn" title="RFI SB">RFI SB</button></div><div class="spot-group"><div class="group-label">vs RFI — Call / 3Bet</div><button class="spot-btn" title="BB vs UTG (Call/3B)">BB vs UTG (Call/3B)</button><button class="spot-btn" title="BB vs HJ (Call/3B)">BB vs HJ (Call/3B)</button><button class="spot-btn" title="BB vs CO (Call/3B)">BB vs CO (Call/3B)</button><button class="spot-btn" title="BB vs BTN (Call/3B)">BB vs BTN (Call/3B)</button><button class="spot-btn" title="BB vs SB (Call/3B)">BB vs SB (Call/3B)</button><button class="spot-btn" title="SB vs UTG (Call/3B)">SB vs UTG (Call/3B)</button><button class="spot-btn" title="SB vs HJ (Call/3B)">SB vs HJ (Call/3B)</button><button class="spot-btn" title="SB vs CO (Call/3B)">SB vs CO (Call/3B)</button><button class="spot-btn" title="SB vs BTN (Call/3B)">SB vs BTN (Call/3B)</button><button class="spot-btn" title="BTN vs UTG (Call/3B)">BTN vs UTG (Call/3B)</button><button class="spot-btn" title="BTN vs HJ (Call/3B)">BTN vs HJ (Call/3B)</button><button class="spot-btn" title="BTN vs CO (Call/3B)">BTN vs CO (Call/3B)</button><button class="spot-btn" title="CO vs UTG (Call/3B)">CO vs UTG (Call/3B)</button><button class="spot-btn" title="CO vs HJ (Call/3B)">CO vs HJ (Call/3B)</button><button class="spot-btn" title="HJ vs UTG (Call/3B)">HJ vs UTG (Call/3B)</button></div><div class="spot-group"><div class="group-label">vs 3Bet — Call / 4Bet</div><button class="spot-btn" title="UTG vs BB 3Bet (C/4B)">UTG vs BB 3Bet (C/4B)</button><button class="spot-btn" title="UTG vs SB 3Bet (C/4B)">UTG vs SB 3Bet (C/4B)</button><button class="spot-btn" title="HJ vs BB 3Bet (C/4B)">HJ vs BB 3Bet (C/4B)</button><button class="spot-btn" title="HJ vs SB 3Bet (C/4B)">HJ vs SB 3Bet (C/4B)</button><button class="spot-btn" title="CO vs BB 3Bet (C/4B)">CO vs BB 3Bet (C/4B)</button><button class="spot-btn" title="CO vs SB 3Bet (C/4B)">CO vs SB 3Bet (C/4B)</button><button class="spot-btn" title="BTN vs BB 3Bet (C/4B)">BTN vs BB 3Bet (C/4B)</button><button class="spot-btn" title="BTN vs SB 3Bet (C/4B)">BTN vs SB 3Bet (C/4B)</button><button class="spot-btn" title="SB vs BB 3Bet (C/4B)">SB vs BB 3Bet (C/4B)</button></div><div class="spot-group"><div class="group-label">vs 4Bet — Call / 5Bet</div><button class="spot-btn" title="BB vs UTG 4Bet (C/5B)">BB vs UTG 4Bet (C/5B)</button><button class="spot-btn" title="BB vs HJ 4Bet (C/5B)">BB vs HJ 4Bet (C/5B)</button><button class="spot-btn" title="BB vs CO 4Bet (C/5B)">BB vs CO 4Bet (C/5B)</button><button class="spot-btn" title="BB vs BTN 4Bet (C/5B)">BB vs BTN 4Bet (C/5B)</button><button class="spot-btn" title="SB vs BTN 4Bet (C/5B)">SB vs BTN 4Bet (C/5B)</button><button class="spot-btn" title="SB vs CO 4Bet (C/5B)">SB vs CO 4Bet (C/5B)</button><button class="spot-btn" title="BTN vs BB 4Bet (C/5B)">BTN vs BB 4Bet (C/5B)</button><button class="spot-btn" title="CO vs BB 4Bet (C/5B)">CO vs BB 4Bet (C/5B)</button></div><div class="spot-group"><div class="group-label">Squeeze</div><button class="spot-btn" title="BB Squeeze vs UTG+call">BB Squeeze vs UTG+call</button><button class="spot-btn" title="BB Squeeze vs HJ+call">BB Squeeze vs HJ+call</button><button class="spot-btn" title="BB Squeeze vs CO+call">BB Squeeze vs CO+call</button><button class="spot-btn" title="BB Squeeze vs BTN+call">BB Squeeze vs BTN+call</button><button class="spot-btn" title="SB Squeeze vs BTN+call">SB Squeeze vs BTN+call</button><button class="spot-btn" title="BTN Squeeze vs CO+call">BTN Squeeze vs CO+call</button></div><div class="spot-group"><div class="group-label">vs Squeeze — Call / 4Bet</div><button class="spot-btn" title="UTG vs Squeeze (C/4B)">UTG vs Squeeze (C/4B)</button><button class="spot-btn" title="HJ vs Squeeze (C/4B)">HJ vs Squeeze (C/4B)</button><button class="spot-btn" title="CO vs Squeeze (C/4B)">CO vs Squeeze (C/4B)</button><button class="spot-btn" title="BTN vs Squeeze (C/4B)">BTN vs Squeeze (C/4B)</button></div><div class="spot-group"><div class="group-label">Limp / vs Limp (SB)</div><button class="spot-btn" title="SB Limp">SB Limp</button><button class="spot-btn" title="BB vs SB Limp (Check/Raise)">BB vs SB Limp (Check/Raise)</button></div></div>
-    </div>
-    <div>
-      <div class="sec-label">Quick Paint</div>
-      <div id="actionList"><div class="act-row active"><span class="act-dot" style="background:#3d7fd4"></span><span class="act-name">Raise/Open</span></div><div class="act-row"><span class="act-dot" style="background:#1d8a5e"></span><span class="act-name">Call</span></div><div class="act-row"><span class="act-dot" style="background:#c47d1a"></span><span class="act-name">3Bet</span></div><div class="act-row"><span class="act-dot" style="background:#a83232"></span><span class="act-name">4Bet</span></div><div class="act-row"><span class="act-dot" style="background:#8b2fc9"></span><span class="act-name">5Bet/Shove</span></div><div class="act-row"><span class="act-dot" style="background:#555b63"></span><span class="act-name">Fold</span></div></div>
-    </div>
-    <div class="hint-box">
-      <strong>คลิก</strong> → ตั้ง % mixed<br>
-      <strong>ลาก</strong> → paint 100%
-    </div>
-    <div>
-      <div class="sec-label">Data</div>
-      <div class="save-btns">
-        <button class="sbtn primary" onclick="saveData()">บันทึก</button>
-        <button class="sbtn" onclick="exportJSON()">Export JSON</button>
-        <button class="sbtn" onclick="importJSON()">Import JSON</button>
-        <button class="sbtn danger" onclick="clearSpot()">ล้าง spot นี้</button>
-        <button class="sbtn danger" onclick="resetAll()">รีเซ็ตทั้งหมด</button>
-      </div>
-      <div class="save-status" id="saveStatus"></div>
+<div class="topbar">
+  <div class="topbar-title">6-MAX PREFLOP</div>
+  <div class="breadcrumb" id="bc"><span class="bc-item active">เลือก spot จากเมนูซ้าย</span></div>
+  <div class="topbar-right">
+    <button class="tbtn gto" onclick="openGTO()">Import GTO Wizard</button>
+    <button class="tbtn" onclick="exportJSON()">Export JSON</button>
+    <button class="tbtn" onclick="importJSON()">Import JSON</button>
+    <button class="tbtn red" onclick="clearSpot()">ล้าง spot</button>
+    <span class="ss" id="ss"></span>
+  </div>
+</div>
+<div class="body">
+  <div class="nav">
+    <div class="nav-scroll" id="navTree"></div>
+    <div class="nav-bot">
+      <div class="ql">Quick Paint</div>
+      <div id="qal"></div>
     </div>
   </div>
-  <div class="main">
-    <div class="info-strip" id="infoStrip"><div>Spot: <span>RFI UTG</span></div><div>มือ: <span>0/169</span></div></div>
-    <div class="rank-header" id="rankHeader"><div class="rank-lbl">A</div><div class="rank-lbl">K</div><div class="rank-lbl">Q</div><div class="rank-lbl">J</div><div class="rank-lbl">T</div><div class="rank-lbl">9</div><div class="rank-lbl">8</div><div class="rank-lbl">7</div><div class="rank-lbl">6</div><div class="rank-lbl">5</div><div class="rank-lbl">4</div><div class="rank-lbl">3</div><div class="rank-lbl">2</div></div>
-    <div class="grid-wrap">
-      <div class="rank-col" id="rankCol"><div class="rank-side-lbl">A</div><div class="rank-side-lbl">K</div><div class="rank-side-lbl">Q</div><div class="rank-side-lbl">J</div><div class="rank-side-lbl">T</div><div class="rank-side-lbl">9</div><div class="rank-side-lbl">8</div><div class="rank-side-lbl">7</div><div class="rank-side-lbl">6</div><div class="rank-side-lbl">5</div><div class="rank-side-lbl">4</div><div class="rank-side-lbl">3</div><div class="rank-side-lbl">2</div></div>
-      <div class="grid" id="grid"><div class="cell"><div class="cell-label">AA</div></div><div class="cell"><div class="cell-label">AKs</div></div><div class="cell"><div class="cell-label">AQs</div></div><div class="cell"><div class="cell-label">AJs</div></div><div class="cell"><div class="cell-label">ATs</div></div><div class="cell"><div class="cell-label">A9s</div></div><div class="cell"><div class="cell-label">A8s</div></div><div class="cell"><div class="cell-label">A7s</div></div><div class="cell"><div class="cell-label">A6s</div></div><div class="cell"><div class="cell-label">A5s</div></div><div class="cell"><div class="cell-label">A4s</div></div><div class="cell"><div class="cell-label">A3s</div></div><div class="cell"><div class="cell-label">A2s</div></div><div class="cell"><div class="cell-label">AKo</div></div><div class="cell"><div class="cell-label">KK</div></div><div class="cell"><div class="cell-label">KQs</div></div><div class="cell"><div class="cell-label">KJs</div></div><div class="cell"><div class="cell-label">KTs</div></div><div class="cell"><div class="cell-label">K9s</div></div><div class="cell"><div class="cell-label">K8s</div></div><div class="cell"><div class="cell-label">K7s</div></div><div class="cell"><div class="cell-label">K6s</div></div><div class="cell"><div class="cell-label">K5s</div></div><div class="cell"><div class="cell-label">K4s</div></div><div class="cell"><div class="cell-label">K3s</div></div><div class="cell"><div class="cell-label">K2s</div></div><div class="cell"><div class="cell-label">AQo</div></div><div class="cell"><div class="cell-label">KQo</div></div><div class="cell"><div class="cell-label">QQ</div></div><div class="cell"><div class="cell-label">QJs</div></div><div class="cell"><div class="cell-label">QTs</div></div><div class="cell"><div class="cell-label">Q9s</div></div><div class="cell"><div class="cell-label">Q8s</div></div><div class="cell"><div class="cell-label">Q7s</div></div><div class="cell"><div class="cell-label">Q6s</div></div><div class="cell"><div class="cell-label">Q5s</div></div><div class="cell"><div class="cell-label">Q4s</div></div><div class="cell"><div class="cell-label">Q3s</div></div><div class="cell"><div class="cell-label">Q2s</div></div><div class="cell"><div class="cell-label">AJo</div></div><div class="cell"><div class="cell-label">KJo</div></div><div class="cell"><div class="cell-label">QJo</div></div><div class="cell"><div class="cell-label">JJ</div></div><div class="cell"><div class="cell-label">JTs</div></div><div class="cell"><div class="cell-label">J9s</div></div><div class="cell"><div class="cell-label">J8s</div></div><div class="cell"><div class="cell-label">J7s</div></div><div class="cell"><div class="cell-label">J6s</div></div><div class="cell"><div class="cell-label">J5s</div></div><div class="cell"><div class="cell-label">J4s</div></div><div class="cell"><div class="cell-label">J3s</div></div><div class="cell"><div class="cell-label">J2s</div></div><div class="cell"><div class="cell-label">ATo</div></div><div class="cell"><div class="cell-label">KTo</div></div><div class="cell"><div class="cell-label">QTo</div></div><div class="cell"><div class="cell-label">JTo</div></div><div class="cell"><div class="cell-label">TT</div></div><div class="cell"><div class="cell-label">T9s</div></div><div class="cell"><div class="cell-label">T8s</div></div><div class="cell"><div class="cell-label">T7s</div></div><div class="cell"><div class="cell-label">T6s</div></div><div class="cell"><div class="cell-label">T5s</div></div><div class="cell"><div class="cell-label">T4s</div></div><div class="cell"><div class="cell-label">T3s</div></div><div class="cell"><div class="cell-label">T2s</div></div><div class="cell"><div class="cell-label">A9o</div></div><div class="cell"><div class="cell-label">K9o</div></div><div class="cell"><div class="cell-label">Q9o</div></div><div class="cell"><div class="cell-label">J9o</div></div><div class="cell"><div class="cell-label">T9o</div></div><div class="cell"><div class="cell-label">99</div></div><div class="cell"><div class="cell-label">98s</div></div><div class="cell"><div class="cell-label">97s</div></div><div class="cell"><div class="cell-label">96s</div></div><div class="cell"><div class="cell-label">95s</div></div><div class="cell"><div class="cell-label">94s</div></div><div class="cell"><div class="cell-label">93s</div></div><div class="cell"><div class="cell-label">92s</div></div><div class="cell"><div class="cell-label">A8o</div></div><div class="cell"><div class="cell-label">K8o</div></div><div class="cell"><div class="cell-label">Q8o</div></div><div class="cell"><div class="cell-label">J8o</div></div><div class="cell"><div class="cell-label">T8o</div></div><div class="cell"><div class="cell-label">98o</div></div><div class="cell"><div class="cell-label">88</div></div><div class="cell"><div class="cell-label">87s</div></div><div class="cell"><div class="cell-label">86s</div></div><div class="cell"><div class="cell-label">85s</div></div><div class="cell"><div class="cell-label">84s</div></div><div class="cell"><div class="cell-label">83s</div></div><div class="cell"><div class="cell-label">82s</div></div><div class="cell"><div class="cell-label">A7o</div></div><div class="cell"><div class="cell-label">K7o</div></div><div class="cell"><div class="cell-label">Q7o</div></div><div class="cell"><div class="cell-label">J7o</div></div><div class="cell"><div class="cell-label">T7o</div></div><div class="cell"><div class="cell-label">97o</div></div><div class="cell"><div class="cell-label">87o</div></div><div class="cell"><div class="cell-label">77</div></div><div class="cell"><div class="cell-label">76s</div></div><div class="cell"><div class="cell-label">75s</div></div><div class="cell"><div class="cell-label">74s</div></div><div class="cell"><div class="cell-label">73s</div></div><div class="cell"><div class="cell-label">72s</div></div><div class="cell"><div class="cell-label">A6o</div></div><div class="cell"><div class="cell-label">K6o</div></div><div class="cell"><div class="cell-label">Q6o</div></div><div class="cell"><div class="cell-label">J6o</div></div><div class="cell"><div class="cell-label">T6o</div></div><div class="cell"><div class="cell-label">96o</div></div><div class="cell"><div class="cell-label">86o</div></div><div class="cell"><div class="cell-label">76o</div></div><div class="cell"><div class="cell-label">66</div></div><div class="cell"><div class="cell-label">65s</div></div><div class="cell"><div class="cell-label">64s</div></div><div class="cell"><div class="cell-label">63s</div></div><div class="cell"><div class="cell-label">62s</div></div><div class="cell"><div class="cell-label">A5o</div></div><div class="cell"><div class="cell-label">K5o</div></div><div class="cell"><div class="cell-label">Q5o</div></div><div class="cell"><div class="cell-label">J5o</div></div><div class="cell"><div class="cell-label">T5o</div></div><div class="cell"><div class="cell-label">95o</div></div><div class="cell"><div class="cell-label">85o</div></div><div class="cell"><div class="cell-label">75o</div></div><div class="cell"><div class="cell-label">65o</div></div><div class="cell"><div class="cell-label">55</div></div><div class="cell"><div class="cell-label">54s</div></div><div class="cell"><div class="cell-label">53s</div></div><div class="cell"><div class="cell-label">52s</div></div><div class="cell"><div class="cell-label">A4o</div></div><div class="cell"><div class="cell-label">K4o</div></div><div class="cell"><div class="cell-label">Q4o</div></div><div class="cell"><div class="cell-label">J4o</div></div><div class="cell"><div class="cell-label">T4o</div></div><div class="cell"><div class="cell-label">94o</div></div><div class="cell"><div class="cell-label">84o</div></div><div class="cell"><div class="cell-label">74o</div></div><div class="cell"><div class="cell-label">64o</div></div><div class="cell"><div class="cell-label">54o</div></div><div class="cell"><div class="cell-label">44</div></div><div class="cell"><div class="cell-label">43s</div></div><div class="cell"><div class="cell-label">42s</div></div><div class="cell"><div class="cell-label">A3o</div></div><div class="cell"><div class="cell-label">K3o</div></div><div class="cell"><div class="cell-label">Q3o</div></div><div class="cell"><div class="cell-label">J3o</div></div><div class="cell"><div class="cell-label">T3o</div></div><div class="cell"><div class="cell-label">93o</div></div><div class="cell"><div class="cell-label">83o</div></div><div class="cell"><div class="cell-label">73o</div></div><div class="cell"><div class="cell-label">63o</div></div><div class="cell"><div class="cell-label">53o</div></div><div class="cell"><div class="cell-label">43o</div></div><div class="cell"><div class="cell-label">33</div></div><div class="cell"><div class="cell-label">32s</div></div><div class="cell"><div class="cell-label">A2o</div></div><div class="cell"><div class="cell-label">K2o</div></div><div class="cell"><div class="cell-label">Q2o</div></div><div class="cell"><div class="cell-label">J2o</div></div><div class="cell"><div class="cell-label">T2o</div></div><div class="cell"><div class="cell-label">92o</div></div><div class="cell"><div class="cell-label">82o</div></div><div class="cell"><div class="cell-label">72o</div></div><div class="cell"><div class="cell-label">62o</div></div><div class="cell"><div class="cell-label">52o</div></div><div class="cell"><div class="cell-label">42o</div></div><div class="cell"><div class="cell-label">32o</div></div><div class="cell"><div class="cell-label">22</div></div></div>
+  <div class="main" id="main">
+    <div class="welcome" id="wel">
+      <div class="wt">6-MAX PREFLOP RANGES</div>
+      <div class="wsub" style="color:var(--mu)">เลือก spot จากเมนูซ้าย<br>คลิกช่อง = ตั้ง % mixed &nbsp;|&nbsp; ลากผ่าน = paint 100%<br>Import GTO Wizard = paste text จาก solver</div>
     </div>
-    <div class="legend" id="legend"><div class="leg-item"><span class="leg-dot" style="background:#3d7fd4"></span><span>Raise/Open</span></div><div class="leg-item"><span class="leg-dot" style="background:#1d8a5e"></span><span>Call</span></div><div class="leg-item"><span class="leg-dot" style="background:#c47d1a"></span><span>3Bet</span></div><div class="leg-item"><span class="leg-dot" style="background:#a83232"></span><span>4Bet</span></div><div class="leg-item"><span class="leg-dot" style="background:#8b2fc9"></span><span>5Bet/Shove</span></div><div class="leg-item"><span class="leg-dot" style="background:#555b63"></span><span>Fold</span></div></div>
+    <div id="rv" style="display:none;flex-direction:column;gap:9px">
+      <div class="spot-hdr"><div class="spot-name" id="sn"></div><div class="spot-stats" id="sts"></div></div>
+      <div class="hint">คลิก = ตั้ง % &nbsp;|&nbsp; ลาก = paint 100%</div>
+      <div class="rh" id="rh"></div>
+      <div class="gw"><div class="rc" id="rc"></div><div class="grid" id="grid"></div></div>
+      <div class="leg" id="leg"></div>
+    </div>
   </div>
 </div>
 
-<!-- Modal -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <div class="modal-title" id="modalTitle"></div>
-    <div class="modal-sub" id="modalSub"></div>
-    <div id="freqSliders"></div>
-    <div class="total-bar" id="totalBar"></div>
-    <div class="freq-total" id="freqTotal"></div>
-    <div class="modal-btns">
-      <button class="mbtn clear-btn" onclick="clearHand()">ล้าง</button>
-      <button class="mbtn" onclick="closeModal()">ยกเลิก</button>
-      <button class="mbtn primary" onclick="applyModal()">ตกลง</button>
+    <div class="mt" id="mt"></div><div class="ms" id="ms"></div>
+    <div id="frs"></div>
+    <div class="tb" id="tb"></div>
+    <div class="ft" id="ft"></div>
+    <div class="mbtns">
+      <button class="mb d" onclick="clearHand()">ล้าง</button>
+      <button class="mb" onclick="closeModal()">ยกเลิก</button>
+      <button class="mb p" onclick="applyModal()">ตกลง</button>
+    </div>
+  </div>
+</div>
+
+<div class="go" id="go">
+  <div class="gm">
+    <h3>Import จาก GTO Wizard / PioSOLVER</h3>
+    <div class="gsub">Ranges Tab → dropdown เลือก action → กด <code>Copy</code> → paste ด้านล่าง</div>
+    <div style="font-size:10px;color:var(--mu);margin-bottom:5px;font-family:'JetBrains Mono',monospace">Import เป็น action:</div>
+    <div class="gap" id="gap"></div>
+    <textarea class="gta" id="gta" placeholder="Paste range text ที่นี่...&#10;เช่น: AA:1,KK:1,QQ:0.75,AKs:0.5&#10;หรือ: AA,KK,QQ,AKs,AKo"></textarea>
+    <div class="gpv" id="gpv">— paste แล้วกด Preview —</div>
+    <div class="gbtns">
+      <button class="mb" onclick="closeGTO()">ยกเลิก</button>
+      <button class="mb" onclick="prevGTO()" style="border-color:#555">Preview</button>
+      <button class="mb p" onclick="applyGTO()">Import เข้า spot นี้</button>
     </div>
   </div>
 </div>
 
 <script>
-const RANKS=['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
-
-const SPOT_GROUPS=[
-  {
-    label:'RFI (Open)',
-    spots:['RFI UTG','RFI HJ','RFI CO','RFI BTN','RFI SB']
-  },
-  {
-    label:'vs RFI — Call / 3Bet',
-    spots:[
-      'BB vs UTG (Call/3B)','BB vs HJ (Call/3B)','BB vs CO (Call/3B)',
-      'BB vs BTN (Call/3B)','BB vs SB (Call/3B)',
-      'SB vs UTG (Call/3B)','SB vs HJ (Call/3B)','SB vs CO (Call/3B)',
-      'SB vs BTN (Call/3B)',
-      'BTN vs UTG (Call/3B)','BTN vs HJ (Call/3B)','BTN vs CO (Call/3B)',
-      'CO vs UTG (Call/3B)','CO vs HJ (Call/3B)',
-      'HJ vs UTG (Call/3B)',
-    ]
-  },
-  {
-    label:'vs 3Bet — Call / 4Bet',
-    spots:[
-      'UTG vs BB 3Bet (C/4B)','UTG vs SB 3Bet (C/4B)',
-      'HJ vs BB 3Bet (C/4B)','HJ vs SB 3Bet (C/4B)',
-      'CO vs BB 3Bet (C/4B)','CO vs SB 3Bet (C/4B)',
-      'BTN vs BB 3Bet (C/4B)','BTN vs SB 3Bet (C/4B)',
-      'SB vs BB 3Bet (C/4B)',
-    ]
-  },
-  {
-    label:'vs 4Bet — Call / 5Bet',
-    spots:[
-      'BB vs UTG 4Bet (C/5B)','BB vs HJ 4Bet (C/5B)',
-      'BB vs CO 4Bet (C/5B)','BB vs BTN 4Bet (C/5B)',
-      'SB vs BTN 4Bet (C/5B)','SB vs CO 4Bet (C/5B)',
-      'BTN vs BB 4Bet (C/5B)','CO vs BB 4Bet (C/5B)',
-    ]
-  },
-  {
-    label:'Squeeze',
-    spots:[
-      'BB Squeeze vs UTG+call','BB Squeeze vs HJ+call',
-      'BB Squeeze vs CO+call','BB Squeeze vs BTN+call',
-      'SB Squeeze vs BTN+call','BTN Squeeze vs CO+call',
-    ]
-  },
-  {
-    label:'vs Squeeze — Call / 4Bet',
-    spots:[
-      'UTG vs Squeeze (C/4B)','HJ vs Squeeze (C/4B)',
-      'CO vs Squeeze (C/4B)','BTN vs Squeeze (C/4B)',
-    ]
-  },
-  {
-    label:'Limp / vs Limp (SB)',
-    spots:[
-      'SB Limp','BB vs SB Limp (Check/Raise)',
-    ]
-  },
-];
-
-const ALL_SPOTS=SPOT_GROUPS.flatMap(g=>g.spots);
-
-const ACTIONS=[
+const R=['A','K','Q','J','T','9','8','7','6','5','4','3','2'];
+const ACTS=[
   {key:'r',label:'Raise/Open',color:'#3d7fd4'},
   {key:'c',label:'Call',color:'#1d8a5e'},
   {key:'3',label:'3Bet',color:'#c47d1a'},
@@ -216,117 +199,256 @@ const ACTIONS=[
   {key:'5',label:'5Bet/Shove',color:'#8b2fc9'},
   {key:'f',label:'Fold',color:'#555b63'},
 ];
+const TREE=[
+  {id:'rfi',label:'RFI',ico:'🂠',flat:[
+    {id:'rfi_utg',label:'UTG'},{id:'rfi_hj',label:'HJ'},{id:'rfi_co',label:'CO'},
+    {id:'rfi_btn',label:'BTN'},{id:'rfi_sb',label:'SB'},
+  ]},
+  {id:'vsrfi',label:'vs RFI',ico:'↩',subs:[
+    {id:'vsrfi_call',label:'Call',spots:[
+      {id:'call_bb_utg',label:'BB vs UTG'},{id:'call_bb_hj',label:'BB vs HJ'},
+      {id:'call_bb_co',label:'BB vs CO'},{id:'call_bb_btn',label:'BB vs BTN'},
+      {id:'call_bb_sb',label:'BB vs SB'},{id:'call_sb_utg',label:'SB vs UTG'},
+      {id:'call_sb_hj',label:'SB vs HJ'},{id:'call_sb_co',label:'SB vs CO'},
+      {id:'call_sb_btn',label:'SB vs BTN'},{id:'call_btn_utg',label:'BTN vs UTG'},
+      {id:'call_btn_hj',label:'BTN vs HJ'},{id:'call_btn_co',label:'BTN vs CO'},
+      {id:'call_co_utg',label:'CO vs UTG'},{id:'call_co_hj',label:'CO vs HJ'},
+      {id:'call_hj_utg',label:'HJ vs UTG'},
+    ]},
+    {id:'vsrfi_3bet',label:'3Bet',spots:[
+      {id:'3b_bb_utg',label:'BB vs UTG'},{id:'3b_bb_hj',label:'BB vs HJ'},
+      {id:'3b_bb_co',label:'BB vs CO'},{id:'3b_bb_btn',label:'BB vs BTN'},
+      {id:'3b_bb_sb',label:'BB vs SB'},{id:'3b_sb_utg',label:'SB vs UTG'},
+      {id:'3b_sb_hj',label:'SB vs HJ'},{id:'3b_sb_co',label:'SB vs CO'},
+      {id:'3b_sb_btn',label:'SB vs BTN'},{id:'3b_btn_utg',label:'BTN vs UTG'},
+      {id:'3b_btn_hj',label:'BTN vs HJ'},{id:'3b_btn_co',label:'BTN vs CO'},
+      {id:'3b_co_utg',label:'CO vs UTG'},{id:'3b_co_hj',label:'CO vs HJ'},
+      {id:'3b_hj_utg',label:'HJ vs UTG'},
+    ]},
+  ]},
+  {id:'vs3bet',label:'vs 3Bet',ico:'↩↩',subs:[
+    {id:'vs3_call',label:'Call 3Bet',spots:[
+      {id:'c3_utg_bb',label:'UTG vs BB 3Bet'},{id:'c3_utg_sb',label:'UTG vs SB 3Bet'},
+      {id:'c3_hj_bb',label:'HJ vs BB 3Bet'},{id:'c3_hj_sb',label:'HJ vs SB 3Bet'},
+      {id:'c3_hj_btn',label:'HJ vs BTN 3Bet'},{id:'c3_co_bb',label:'CO vs BB 3Bet'},
+      {id:'c3_co_sb',label:'CO vs SB 3Bet'},{id:'c3_co_btn',label:'CO vs BTN 3Bet'},
+      {id:'c3_btn_bb',label:'BTN vs BB 3Bet'},{id:'c3_btn_sb',label:'BTN vs SB 3Bet'},
+      {id:'c3_sb_bb',label:'SB vs BB 3Bet'},
+    ]},
+    {id:'vs3_4bet',label:'4Bet',spots:[
+      {id:'4b_utg_bb',label:'UTG vs BB 3Bet'},{id:'4b_utg_sb',label:'UTG vs SB 3Bet'},
+      {id:'4b_hj_bb',label:'HJ vs BB 3Bet'},{id:'4b_hj_sb',label:'HJ vs SB 3Bet'},
+      {id:'4b_hj_btn',label:'HJ vs BTN 3Bet'},{id:'4b_co_bb',label:'CO vs BB 3Bet'},
+      {id:'4b_co_sb',label:'CO vs SB 3Bet'},{id:'4b_co_btn',label:'CO vs BTN 3Bet'},
+      {id:'4b_btn_bb',label:'BTN vs BB 3Bet'},{id:'4b_btn_sb',label:'BTN vs SB 3Bet'},
+      {id:'4b_sb_bb',label:'SB vs BB 3Bet'},
+    ]},
+  ]},
+  {id:'vs4bet',label:'vs 4Bet',ico:'↩↩↩',subs:[
+    {id:'vs4_call',label:'Call 4Bet',spots:[
+      {id:'c4_bb_utg',label:'BB vs UTG 4Bet'},{id:'c4_bb_hj',label:'BB vs HJ 4Bet'},
+      {id:'c4_bb_co',label:'BB vs CO 4Bet'},{id:'c4_bb_btn',label:'BB vs BTN 4Bet'},
+      {id:'c4_bb_sb',label:'BB vs SB 4Bet'},{id:'c4_sb_btn',label:'SB vs BTN 4Bet'},
+      {id:'c4_sb_co',label:'SB vs CO 4Bet'},{id:'c4_btn_bb',label:'BTN vs BB 4Bet'},
+      {id:'c4_btn_sb',label:'BTN vs SB 4Bet'},{id:'c4_co_bb',label:'CO vs BB 4Bet'},
+    ]},
+    {id:'vs4_5bet',label:'5Bet/Shove',spots:[
+      {id:'5b_bb_utg',label:'BB vs UTG 4Bet'},{id:'5b_bb_hj',label:'BB vs HJ 4Bet'},
+      {id:'5b_bb_co',label:'BB vs CO 4Bet'},{id:'5b_bb_btn',label:'BB vs BTN 4Bet'},
+      {id:'5b_sb_btn',label:'SB vs BTN 4Bet'},{id:'5b_btn_bb',label:'BTN vs BB 4Bet'},
+      {id:'5b_co_bb',label:'CO vs BB 4Bet'},
+    ]},
+  ]},
+  {id:'squeeze',label:'Squeeze',ico:'⚡',subs:[
+    {id:'sq_range',label:'Squeeze Range',spots:[
+      {id:'sq_bb_utg',label:'BB vs UTG+call'},{id:'sq_bb_hj',label:'BB vs HJ+call'},
+      {id:'sq_bb_co',label:'BB vs CO+call'},{id:'sq_bb_btn',label:'BB vs BTN+call'},
+      {id:'sq_sb_btn',label:'SB vs BTN+call'},{id:'sq_btn_co',label:'BTN vs CO+call'},
+      {id:'sq_co_hj',label:'CO vs HJ+call'},
+    ]},
+    {id:'sq_vs',label:'vs Squeeze (Call/4Bet)',spots:[
+      {id:'vsq_utg',label:'UTG vs Squeeze'},{id:'vsq_hj',label:'HJ vs Squeeze'},
+      {id:'vsq_co',label:'CO vs Squeeze'},{id:'vsq_btn',label:'BTN vs Squeeze'},
+      {id:'vsq_caller',label:'Caller vs Squeeze'},
+    ]},
+  ]},
+  {id:'limp',label:'Limp / vs Limp',ico:'◌',flat:[
+    {id:'limp_sb',label:'SB Limp'},{id:'limp_bb_vs',label:'BB vs SB Limp'},
+    {id:'limp_bb_iso',label:'BB Iso vs Limp'},{id:'limp_sb_vs_iso',label:'SB vs BB Iso'},
+  ]},
+];
 
-let currentSpot=0,currentAction='r',painting=false,didDrag=false;
-let spotData={};
-let modalHand=null,modalSpot=null,modalVals={};
+let curSpot=null,curAct='r',painting=false,didDrag=false;
+let data={};
+let mHand=null,mSpot=null,mVals={};
+let gAct='r';
+let og={},os={};
 
-function makeHand(i,j){
-  const r1=RANKS[i],r2=RANKS[j];
-  if(i===j)return r1+r2;
-  if(i<j)return r1+r2+'s';
-  return r2+r1+'o';
-}
-function skey(sp,h){return sp+'§'+h;}
+const hand=(i,j)=>{const r1=R[i],r2=R[j];if(i===j)return r1+r2;if(i<j)return r1+r2+'s';return r2+r1+'o';};
+const sk=(sp,h)=>sp+'|'+h;
+const hasData=id=>Object.keys(data).some(k=>k.startsWith(id+'|'));
 
-function loadStorage(){
-  try{const r=localStorage.getItem('pkr6max');if(r)spotData=JSON.parse(r);}catch(e){}
-}
-function saveData(){
-  try{localStorage.setItem('pkr6max',JSON.stringify(spotData));showStatus('✓ บันทึกแล้ว');}
-  catch(e){showStatus('✗ บันทึกไม่ได้');}
-}
-function showStatus(m){
-  const el=document.getElementById('saveStatus');
-  el.textContent=m;setTimeout(()=>el.textContent='',2500);
-}
+function load(){try{const r=localStorage.getItem('pkr6v3');if(r)data=JSON.parse(r);}catch(e){}}
+function save(){try{localStorage.setItem('pkr6v3',JSON.stringify(data));ss('✓');}catch(e){ss('✗');}}
+function ss(m){const el=document.getElementById('ss');el.textContent=m;setTimeout(()=>el.textContent='',1800);}
+
 function exportJSON(){
-  const blob=new Blob([JSON.stringify(spotData,null,2)],{type:'application/json'});
-  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
-  a.download='6max-ranges.json';a.click();
+  const b=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='6max-ranges.json';a.click();
 }
 function importJSON(){
   const inp=document.createElement('input');inp.type='file';inp.accept='.json';
   inp.onchange=e=>{
     const f=e.target.files[0];if(!f)return;
     const r=new FileReader();
-    r.onload=ev=>{
-      try{spotData=JSON.parse(ev.target.result);saveData();renderGrid();updateInfo();showStatus('✓ import แล้ว');}
-      catch(err){showStatus('✗ ไฟล์ผิดรูปแบบ');}
-    };
+    r.onload=ev=>{try{data=JSON.parse(ev.target.result);save();renderGrid();updateStats();renderNav();ss('✓ imported');}catch(err){ss('✗');}};
     r.readAsText(f);
-  };
-  inp.click();
+  };inp.click();
 }
 function clearSpot(){
+  if(!curSpot)return;
   if(!confirm('ล้าง spot นี้?'))return;
-  const sp=ALL_SPOTS[currentSpot];
-  Object.keys(spotData).forEach(k=>{if(k.startsWith(sp+'§'))delete spotData[k];});
-  renderGrid();updateInfo();
-}
-function resetAll(){
-  if(!confirm('รีเซ็ตทั้งหมด?'))return;
-  spotData={};try{localStorage.removeItem('pkr6max');}catch(e){}
-  renderGrid();updateInfo();
+  Object.keys(data).forEach(k=>{if(k.startsWith(curSpot+'|'))delete data[k];});
+  renderGrid();updateStats();renderNav();save();
 }
 
-function quickSet(hand){
-  const sp=ALL_SPOTS[currentSpot];
-  const d={r:0,c:0,'3':0,'4':0,'5':0,f:0};
-  d[currentAction]=100;
-  spotData[skey(sp,hand)]=d;
-  saveData();
+/* NAV */
+function renderNav(){
+  const el=document.getElementById('navTree');el.innerHTML='';
+  TREE.forEach(g=>{
+    const ge=document.createElement('div');ge.className='tg';
+    const th=document.createElement('div');th.className='th'+(og[g.id]?' open':'');
+    const ch=document.createElement('span');ch.className='chev'+(og[g.id]?' o':'');ch.textContent='▶';
+    const ico=document.createElement('span');ico.className='tico';ico.textContent=g.ico||'';
+    const lb=document.createElement('span');lb.className='tlbl';lb.textContent=g.label;
+    th.appendChild(ch);th.appendChild(ico);th.appendChild(lb);
+    th.onclick=()=>{og[g.id]=!og[g.id];renderNav();};
+    ge.appendChild(th);
+    const tc=document.createElement('div');tc.className='tc'+(og[g.id]?' o':'');
+    if(g.flat){g.flat.forEach(s=>tc.appendChild(mkSI(s)));}
+    else if(g.subs){
+      g.subs.forEach(sub=>{
+        const sk2=g.id+'_'+sub.id;
+        const sg=document.createElement('div');sg.className='sg';
+        const sh=document.createElement('div');sh.className='sh'+(os[sk2]?' open':'');
+        const sc=document.createElement('span');sc.className='schev'+(os[sk2]?' o':'');sc.textContent='▶';
+        const sl=document.createElement('span');
+        const hd=sub.spots.some(s=>hasData(s.id));
+        sl.className='slbl'+(hd?' hd':'');sl.textContent=sub.label;
+        sh.appendChild(sc);sh.appendChild(sl);
+        sh.onclick=()=>{os[sk2]=!os[sk2];renderNav();};
+        sg.appendChild(sh);
+        const sp=document.createElement('div');sp.className='spots'+(os[sk2]?' o':'');
+        sub.spots.forEach(s=>sp.appendChild(mkSI(s)));
+        sg.appendChild(sp);tc.appendChild(sg);
+      });
+    }
+    ge.appendChild(tc);el.appendChild(ge);
+  });
 }
 
-function buildCellSVG(segs){
-  const W=42,H=42;
-  if(!segs||segs.length===0)return'';
-  if(segs.length===1)return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="${segs[0].color}"/></svg>`;
-  const s0=segs[0],s1=segs[1];
-  const total=s0.pct+s1.pct;
-  const ratio=s0.pct/total;
-  const px=W*ratio*2,py=H*ratio*2;
-  const x1=Math.min(px,W),y0=Math.min(py,H);
-  let paths=`<polygon points="0,0 ${x1},0 0,${y0}" fill="${s0.color}"/>`;
-  paths+=`<polygon points="${x1},0 ${W},0 ${W},${H} 0,${H} 0,${y0}" fill="${s1.color}"/>`;
-  if(segs.length>2){
-    const extra=segs.slice(2);
-    const totalExtra=extra.reduce((s,a)=>s+a.pct,0);
-    const barH=5;let x=0;
-    extra.forEach(seg=>{
-      const w=(seg.pct/totalExtra)*W;
-      paths+=`<rect x="${x}" y="${H-barH}" width="${w}" height="${barH}" fill="${seg.color}"/>`;
-      x+=w;
-    });
+function mkSI(s){
+  const el=document.createElement('div');
+  const hd=hasData(s.id);
+  el.className='si'+(s.id===curSpot?' active':'')+(hd?' hd':'');
+  const dot=document.createElement('span');dot.className='sdot'+(hd?' f':'');
+  const lb=document.createElement('span');lb.textContent=s.label;
+  el.appendChild(dot);el.appendChild(lb);
+  el.onclick=()=>selSpot(s.id,s.label);
+  return el;
+}
+
+function findInfo(id){
+  for(const g of TREE){
+    if(g.flat){const s=g.flat.find(x=>x.id===id);if(s)return{g:g.label,sub:null,s:s.label};}
+    if(g.subs){for(const sub of g.subs){const s=sub.spots.find(x=>x.id===id);if(s)return{g:g.label,sub:sub.label,s:s.label};}}
+  }return null;
+}
+
+function selSpot(id,label){
+  curSpot=id;
+  for(const g of TREE){
+    if(g.flat&&g.flat.find(x=>x.id===id))og[g.id]=true;
+    if(g.subs){for(const sub of g.subs){if(sub.spots.find(x=>x.id===id)){og[g.id]=true;os[g.id+'_'+sub.id]=true;}}}
   }
-  return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${paths}</svg>`;
+  renderNav();
+  document.getElementById('wel').style.display='none';
+  const rv=document.getElementById('rv');rv.style.display='flex';
+  document.getElementById('sn').textContent=label;
+  updateBC();renderGrid();updateStats();
 }
 
-function getSegs(hand){
-  const sp=ALL_SPOTS[currentSpot];
-  const d=spotData[skey(sp,hand)];
-  if(!d)return null;
-  const segs=ACTIONS.filter(a=>(d[a.key]||0)>0).map(a=>({color:a.color,pct:d[a.key]}));
-  return segs.length?segs:null;
+function updateBC(){
+  const bc=document.getElementById('bc');bc.innerHTML='';
+  if(!curSpot){bc.innerHTML='<span class="bc-item active">เลือก spot จากเมนูซ้าย</span>';return;}
+  const info=findInfo(curSpot);if(!info)return;
+  const add=(txt,active)=>{const s=document.createElement('span');s.className='bc-item'+(active?' active':'');s.textContent=txt;bc.appendChild(s);};
+  const sep=()=>{const s=document.createElement('span');s.className='bc-sep';s.textContent='/';bc.appendChild(s);};
+  add(info.g,false);if(info.sub){sep();add(info.sub,false);}sep();add(info.s,true);
+}
+
+/* QUICK ACTIONS */
+function renderQA(){
+  const el=document.getElementById('qal');el.innerHTML='';
+  ACTS.forEach(a=>{
+    const r=document.createElement('div');r.className='qa'+(a.key===curAct?' active':'');
+    r.innerHTML=`<span class="qadot" style="background:${a.color}"></span><span class="qaname">${a.label}</span>`;
+    r.onclick=()=>{curAct=a.key;renderQA();};el.appendChild(r);
+  });
+}
+
+/* LEGEND */
+function renderLeg(){
+  const el=document.getElementById('leg');el.innerHTML='';
+  ACTS.forEach(a=>{const li=document.createElement('div');li.className='li';li.innerHTML=`<span class="ld" style="background:${a.color}"></span><span>${a.label}</span>`;el.appendChild(li);});
+}
+
+/* HEADERS */
+function renderHdrs(){
+  document.getElementById('rh').innerHTML=R.map(r=>`<div class="rl">${r}</div>`).join('');
+  document.getElementById('rc').innerHTML=R.map(r=>`<div class="rsl">${r}</div>`).join('');
+}
+
+/* GRID */
+function svg(segs){
+  const W=42,H=42;
+  if(!segs||!segs.length)return'';
+  if(segs.length===1)return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="${segs[0].color}"/></svg>`;
+  const s0=segs[0],s1=segs[1],ratio=s0.pct/(s0.pct+s1.pct);
+  const x1=Math.min(W*ratio*2,W),y0=Math.min(H*ratio*2,H);
+  let p=`<polygon points="0,0 ${x1},0 0,${y0}" fill="${s0.color}"/>`;
+  p+=`<polygon points="${x1},0 ${W},0 ${W},${H} 0,${H} 0,${y0}" fill="${s1.color}"/>`;
+  if(segs.length>2){const ex=segs.slice(2),tot=ex.reduce((s,a)=>s+a.pct,0);let x=0;ex.forEach(sg=>{const w=(sg.pct/tot)*W;p+=`<rect x="${x}" y="${H-5}" width="${w}" height="5" fill="${sg.color}"/>`;x+=w;});}
+  return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${p}</svg>`;
+}
+
+function getSegs(h){
+  if(!curSpot)return null;
+  const d=data[sk(curSpot,h)];if(!d)return null;
+  const s=ACTS.filter(a=>(d[a.key]||0)>0).map(a=>({color:a.color,pct:d[a.key]}));
+  return s.length?s:null;
+}
+
+function qs(h){
+  if(!curSpot)return;
+  const d={r:0,c:0,'3':0,'4':0,'5':0,f:0};d[curAct]=100;
+  data[sk(curSpot,h)]=d;save();
 }
 
 function renderGrid(){
   const grid=document.getElementById('grid');grid.innerHTML='';
   for(let i=0;i<13;i++){
     for(let j=0;j<13;j++){
-      const hand=makeHand(i,j);
-      const segs=getSegs(hand);
-      const cell=document.createElement('div');
-      cell.className='cell';
-      if(segs){cell.innerHTML=buildCellSVG(segs);cell.style.border='1px solid rgba(255,255,255,0.08)';}
-      const lbl=document.createElement('div');lbl.className='cell-label';lbl.textContent=hand;
-      cell.appendChild(lbl);
+      const h=hand(i,j);const segs=getSegs(h);
+      const cell=document.createElement('div');cell.className='cell';
+      if(segs){cell.innerHTML=svg(segs);cell.style.border='1px solid rgba(255,255,255,.08)';}
+      const lb=document.createElement('div');lb.className='cl';lb.textContent=h;cell.appendChild(lb);
       cell.addEventListener('mousedown',e=>{e.preventDefault();didDrag=false;painting=true;});
-      cell.addEventListener('mouseenter',()=>{if(painting){didDrag=true;quickSet(hand);renderGrid();updateInfo();}});
+      cell.addEventListener('mouseenter',()=>{if(painting){didDrag=true;qs(h);renderGrid();updateStats();renderNav();}});
       cell.addEventListener('mouseup',()=>{
         if(!painting)return;
-        if(!didDrag)openModal(hand);
-        else{quickSet(hand);renderGrid();updateInfo();}
+        if(!didDrag)openModal(h);
+        else{qs(h);renderGrid();updateStats();renderNav();}
         painting=false;didDrag=false;
       });
       grid.appendChild(cell);
@@ -334,125 +456,121 @@ function renderGrid(){
   }
 }
 
-function updateInfo(){
-  const sp=ALL_SPOTS[currentSpot];
-  const keys=Object.keys(spotData).filter(k=>k.startsWith(sp+'§'));
-  const total=keys.length;
-  const counts={r:0,c:0,'3':0,'4':0,'5':0,f:0};
-  keys.forEach(k=>{const d=spotData[k];ACTIONS.forEach(a=>{if((d[a.key]||0)>0)counts[a.key]++;});});
-  let html=`<div>Spot: <span>${sp}</span></div><div>มือ: <span>${total}/169</span></div>`;
-  ACTIONS.forEach(a=>{if(counts[a.key]>0)html+=`<div style="color:${a.color}">${a.label}: <span style="color:#fff">${counts[a.key]}</span></div>`;});
-  document.getElementById('infoStrip').innerHTML=html;
+function updateStats(){
+  if(!curSpot)return;
+  const keys=Object.keys(data).filter(k=>k.startsWith(curSpot+'|'));
+  const cnt={r:0,c:0,'3':0,'4':0,'5':0,f:0};
+  keys.forEach(k=>{const d=data[k];ACTS.forEach(a=>{if((d[a.key]||0)>0)cnt[a.key]++;});});
+  let html=`<div>มือ: <span>${keys.length}/169</span></div>`;
+  ACTS.forEach(a=>{if(cnt[a.key]>0)html+=`<div style="color:${a.color}">${a.label} <span style="color:#fff">${cnt[a.key]}</span></div>`;});
+  document.getElementById('sts').innerHTML=html;
 }
 
-function renderSpots(){
-  const el=document.getElementById('spotList');el.innerHTML='';
-  let idx=0;
-  SPOT_GROUPS.forEach(g=>{
-    const grp=document.createElement('div');grp.className='spot-group';
-    const glbl=document.createElement('div');glbl.className='group-label';glbl.textContent=g.label;
-    grp.appendChild(glbl);
-    g.spots.forEach(s=>{
-      const i=idx++;
-      const b=document.createElement('button');
-      b.className='spot-btn'+(i===currentSpot?' active':'');
-      b.textContent=s;b.title=s;
-      b.onclick=()=>{currentSpot=i;renderSpots();renderGrid();updateInfo();};
-      grp.appendChild(b);
-    });
-    el.appendChild(grp);
-  });
+/* MODAL */
+function openModal(h){
+  if(!curSpot)return;
+  mHand=h;mSpot=curSpot;
+  const d=data[sk(curSpot,h)]||{r:0,c:0,'3':0,'4':0,'5':0,f:0};
+  mVals={...d};
+  document.getElementById('mt').textContent=h;
+  const suit=h.endsWith('s')?'Suited':h.endsWith('o')?'Offsuit':'Pair';
+  const info=findInfo(curSpot);
+  document.getElementById('ms').textContent=(info?info.s:curSpot)+' — '+suit;
+  renderSliders();document.getElementById('overlay').classList.add('open');
 }
+function closeModal(){document.getElementById('overlay').classList.remove('open');mHand=null;}
+function clearHand(){if(mHand)delete data[sk(mSpot,mHand)];closeModal();renderGrid();updateStats();renderNav();save();}
 
-function renderActions(){
-  const el=document.getElementById('actionList');el.innerHTML='';
-  ACTIONS.forEach(a=>{
-    const row=document.createElement('div');
-    row.className='act-row'+(a.key===currentAction?' active':'');
-    row.innerHTML=`<span class="act-dot" style="background:${a.color}"></span><span class="act-name">${a.label}</span>`;
-    row.onclick=()=>{currentAction=a.key;renderActions();};
-    el.appendChild(row);
-  });
-  const leg=document.getElementById('legend');leg.innerHTML='';
-  ACTIONS.forEach(a=>{
-    const li=document.createElement('div');li.className='leg-item';
-    li.innerHTML=`<span class="leg-dot" style="background:${a.color}"></span><span>${a.label}</span>`;
-    leg.appendChild(li);
-  });
-}
-
-function renderHeaders(){
-  document.getElementById('rankHeader').innerHTML=RANKS.map(r=>`<div class="rank-lbl">${r}</div>`).join('');
-  document.getElementById('rankCol').innerHTML=RANKS.map(r=>`<div class="rank-side-lbl">${r}</div>`).join('');
-}
-
-/* Modal */
-function openModal(hand){
-  const sp=ALL_SPOTS[currentSpot];
-  modalHand=hand;modalSpot=sp;
-  const d=spotData[skey(sp,hand)]||{r:0,c:0,'3':0,'4':0,'5':0,f:0};
-  modalVals={...d};
-  document.getElementById('modalTitle').textContent=hand;
-  const suit=hand.endsWith('s')?'Suited':hand.endsWith('o')?'Offsuit':'Pair';
-  document.getElementById('modalSub').textContent=`${sp} — ${suit}`;
-  renderSliders();
-  document.getElementById('overlay').classList.add('open');
-}
-function closeModal(){document.getElementById('overlay').classList.remove('open');modalHand=null;}
-function clearHand(){
-  if(modalHand)delete spotData[skey(modalSpot,modalHand)];
-  closeModal();renderGrid();updateInfo();saveData();
-}
 function renderSliders(){
-  const el=document.getElementById('freqSliders');el.innerHTML='';
-  ACTIONS.forEach(a=>{
-    const row=document.createElement('div');row.className='freq-row';
-    const lbl=document.createElement('label');
-    lbl.innerHTML=`<span class="act-dot" style="background:${a.color};border-radius:2px;width:10px;height:10px;flex-shrink:0"></span>${a.label}`;
-    const slider=document.createElement('input');
-    slider.type='range';slider.min=0;slider.max=100;slider.step=5;
-    slider.value=modalVals[a.key]||0;
-    const val=document.createElement('div');val.className='freq-val';
-    val.id='fval_'+a.key;val.textContent=(modalVals[a.key]||0)+'%';
-    slider.addEventListener('input',()=>{
-      modalVals[a.key]=parseInt(slider.value);
-      val.textContent=slider.value+'%';
-      updateTotal();
-    });
-    row.appendChild(lbl);row.appendChild(slider);row.appendChild(val);
-    el.appendChild(row);
-  });
-  updateTotal();
+  const el=document.getElementById('frs');el.innerHTML='';
+  ACTS.forEach(a=>{
+    const row=document.createElement('div');row.className='fr';
+    const lb=document.createElement('label');
+    lb.innerHTML=`<span style="width:10px;height:10px;border-radius:2px;background:${a.color};flex-shrink:0;display:inline-block"></span>${a.label}`;
+    const sl=document.createElement('input');sl.type='range';sl.min=0;sl.max=100;sl.step=5;sl.value=mVals[a.key]||0;
+    const vl=document.createElement('div');vl.className='fv';vl.id='fv_'+a.key;vl.textContent=(mVals[a.key]||0)+'%';
+    sl.addEventListener('input',()=>{mVals[a.key]=parseInt(sl.value);vl.textContent=sl.value+'%';updTotal();});
+    row.appendChild(lb);row.appendChild(sl);row.appendChild(vl);el.appendChild(row);
+  });updTotal();
 }
-function updateTotal(){
-  const total=ACTIONS.reduce((s,a)=>s+(modalVals[a.key]||0),0);
-  const bar=document.getElementById('totalBar');bar.innerHTML='';
-  ACTIONS.forEach(a=>{
-    if((modalVals[a.key]||0)>0){
-      const seg=document.createElement('div');seg.className='total-seg';
-      seg.style.width=(modalVals[a.key]||0)+'%';seg.style.background=a.color;
-      bar.appendChild(seg);
-    }
-  });
-  if(total<100){const pad=document.createElement('div');pad.style.flex=1;pad.style.background='var(--surface2)';bar.appendChild(pad);}
-  const el=document.getElementById('freqTotal');
-  el.className='freq-total '+(total===100?'ok':total>100?'over':'under');
-  el.textContent=total===100?'✓ รวม 100%':total>100?`✗ รวม ${total}% (เกิน ${total-100}%)`:`รวม ${total}% (เหลือ ${100-total}%)`;
+
+function updTotal(){
+  const tot=ACTS.reduce((s,a)=>s+(mVals[a.key]||0),0);
+  const bar=document.getElementById('tb');bar.innerHTML='';
+  ACTS.forEach(a=>{if((mVals[a.key]||0)>0){const sg=document.createElement('div');sg.className='ts';sg.style.width=(mVals[a.key]||0)+'%';sg.style.background=a.color;bar.appendChild(sg);}});
+  if(tot<100){const pd=document.createElement('div');pd.style.flex=1;pd.style.background='var(--sur2)';bar.appendChild(pd);}
+  const el=document.getElementById('ft');
+  el.className='ft '+(tot===100?'ok':tot>100?'over':'under');
+  el.textContent=tot===100?'✓ รวม 100%':tot>100?`✗ รวม ${tot}% (เกิน ${tot-100}%)`:`รวม ${tot}% (เหลือ ${100-tot}%)`;
 }
+
 function applyModal(){
-  const total=ACTIONS.reduce((s,a)=>s+(modalVals[a.key]||0),0);
-  if(total>100){alert('รวมเกิน 100%');return;}
-  if(total===0)delete spotData[skey(modalSpot,modalHand)];
-  else spotData[skey(modalSpot,modalHand)]={...modalVals};
-  closeModal();renderGrid();updateInfo();saveData();
+  const tot=ACTS.reduce((s,a)=>s+(mVals[a.key]||0),0);
+  if(tot>100){alert('รวมเกิน 100%');return;}
+  if(tot===0)delete data[sk(mSpot,mHand)];
+  else data[sk(mSpot,mHand)]={...mVals};
+  closeModal();renderGrid();updateStats();renderNav();save();
+}
+
+/* GTO IMPORT */
+function openGTO(){gAct=curAct;renderGTOPicker();document.getElementById('gta').value='';document.getElementById('gpv').textContent='— paste แล้วกด Preview —';document.getElementById('gpv').className='gpv';document.getElementById('go').classList.add('open');}
+function closeGTO(){document.getElementById('go').classList.remove('open');}
+
+function renderGTOPicker(){
+  const el=document.getElementById('gap');el.innerHTML='';
+  ACTS.forEach(a=>{
+    const b=document.createElement('button');b.className='mb'+(a.key===gAct?' p':'');
+    b.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px';
+    b.innerHTML=`<span style="width:8px;height:8px;border-radius:2px;background:${a.color};display:inline-block"></span>${a.label}`;
+    b.onclick=()=>{gAct=a.key;renderGTOPicker();};el.appendChild(b);
+  });
+}
+
+function parseGTO(txt){
+  const res={};
+  const clean=txt.replace(/\r/g,'').replace(/\n/g,',').replace(/\s+/g,'');
+  clean.split(',').filter(t=>t).forEach(tok=>{
+    let h='',freq=1;
+    if(tok.includes(':')){const p=tok.split(':');h=p[0];freq=Math.min(1,Math.max(0,parseFloat(p[1])||0));}
+    else{h=tok;freq=1;}
+    const exp=h=>{const r1=h[0],r2=h[1]||'';if(!r2||h.endsWith('s')||h.endsWith('o')||r1===r2)return[h];return[r1+r2+'s',r1+r2+'o'];};
+    exp(h).forEach(x=>{if(x.length>=2)res[x]=Math.round(freq*100);});
+  });
+  return res;
+}
+
+function prevGTO(){
+  const p=parseGTO(document.getElementById('gta').value);
+  const keys=Object.keys(p);const el=document.getElementById('gpv');
+  if(!keys.length){el.textContent='✗ ไม่พบมือที่ parse ได้';el.className='gpv err';return;}
+  const sam=keys.slice(0,5).map(k=>`${k}:${p[k]}%`).join(', ');
+  el.textContent=`✓ พบ ${keys.length} มือ — ${sam}${keys.length>5?'…':''}`;el.className='gpv ok';
+}
+
+function applyGTO(){
+  if(!curSpot){alert('กรุณาเลือก spot ก่อน');return;}
+  const p=parseGTO(document.getElementById('gta').value);
+  const keys=Object.keys(p);if(!keys.length){alert('ไม่พบมือที่ parse ได้');return;}
+  keys.forEach(h=>{
+    const freq=p[h];if(freq===0)return;
+    const ex=data[sk(curSpot,h)]||{r:0,c:0,'3':0,'4':0,'5':0,f:0};
+    const otTot=ACTS.filter(a=>a.key!==gAct).reduce((s,a)=>s+(ex[a.key]||0),0);
+    const rem=100-freq;const nd={...ex};nd[gAct]=freq;
+    if(otTot>0){ACTS.filter(a=>a.key!==gAct).forEach(a=>{nd[a.key]=Math.round(((ex[a.key]||0)/otTot)*rem);});}
+    else{ACTS.filter(a=>a.key!==gAct).forEach(a=>nd[a.key]=0);if(gAct!=='f')nd['f']=rem;}
+    const tot=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
+    if(tot>100)nd[gAct]=Math.max(0,nd[gAct]-(tot-100));
+    data[sk(curSpot,h)]=nd;
+  });
+  save();renderGrid();updateStats();renderNav();closeGTO();ss(`✓ ${keys.length} มือ`);
 }
 
 document.getElementById('overlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+document.getElementById('go').addEventListener('mousedown',e=>{if(e.target===document.getElementById('go'))closeGTO();});
 document.addEventListener('mouseup',()=>{painting=false;didDrag=false;});
-document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeGTO();}});
 
-loadStorage();renderSpots();renderActions();renderHeaders();renderGrid();updateInfo();
+load();renderNav();renderQA();renderLeg();renderHdrs();
 </script>
-
-
-</body></html>
+</body>
+</html>
