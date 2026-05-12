@@ -27,7 +27,23 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .tbtn.gto:hover{background:#1f451f}
 .tbtn.red{color:#d44;border-color:#3a2020}
 .tbtn.red:hover{background:#1e1515}
-.ss{font-size:10px;color:#25b07a;font-family:'JetBrains Mono',monospace;min-width:50px}
+.tbtn.rng{background:#1a1a2e;border-color:#3a3a6e;color:#a78bfa;font-weight:500}
+.tbtn.rng:hover{background:#22223a}
+.rng-overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);display:none;align-items:center;justify-content:center;z-index:400;backdrop-filter:blur(6px)}
+.rng-overlay.open{display:flex}
+.rng-box{background:#0e0f11;border:1px solid #3a3a6e;border-radius:16px;padding:36px 48px;display:flex;flex-direction:column;align-items:center;gap:20px;min-width:280px;position:relative}
+.rng-close{position:absolute;top:12px;right:14px;background:none;border:none;color:var(--mu);font-size:16px;cursor:pointer;line-height:1}
+.rng-close:hover{color:var(--tx)}
+.rng-label{font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--mu);letter-spacing:2px;text-transform:uppercase}
+.rng-number{font-family:'JetBrains Mono',monospace;font-size:80px;font-weight:600;line-height:1;min-width:3ch;text-align:center;color:#a78bfa;transition:color .15s}
+.rng-result{font-family:'JetBrains Mono',monospace;font-size:22px;font-weight:600;letter-spacing:1px;min-height:32px;text-align:center;transition:all .2s}
+.rng-result.bet{color:#3d7fd4}
+.rng-result.check{color:#1d8a5e}
+.rng-result.idle{color:var(--di)}
+.rng-btn{background:#a78bfa;border:none;border-radius:10px;color:#0e0f11;font-size:15px;font-weight:600;font-family:'IBM Plex Sans Thai',sans-serif;padding:12px 36px;cursor:pointer;transition:all .12s;letter-spacing:.5px}
+.rng-btn:hover{background:#c4b5fd;transform:scale(1.03)}
+.rng-btn:active{transform:scale(0.97)}
+.rng-btn:disabled{background:#2a2d30;color:var(--mu);cursor:default;transform:none}
 .body{display:flex;flex:1;overflow:hidden}
 .nav{width:230px;flex-shrink:0;border-right:1px solid var(--bor);display:flex;flex-direction:column;overflow:hidden}
 .nav-scroll{flex:1;overflow-y:auto;padding:8px 6px}
@@ -129,6 +145,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
   <div class="topbar-title">6-MAX PREFLOP</div>
   <div class="breadcrumb" id="bc"><span class="bc-item active">เลือก spot จากเมนูซ้าย</span></div>
   <div class="topbar-right">
+    <button class="tbtn rng" onclick="toggleRNG()" id="rngBtn">🎲 RNG</button>
     <button class="tbtn gto" onclick="openGTO()">Import GTO Wizard</button>
     <button class="tbtn" onclick="exportJSON()">Export JSON</button>
     <button class="tbtn" onclick="importJSON()">Import JSON</button>
@@ -186,6 +203,17 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
       <button class="mb" onclick="prevGTO()" style="border-color:#555">Preview</button>
       <button class="mb p" onclick="applyGTO()">Import เข้า spot นี้</button>
     </div>
+  </div>
+</div>
+
+<!-- RNG Overlay -->
+<div class="rng-overlay" id="rngOverlay">
+  <div class="rng-box">
+    <button class="rng-close" onclick="closeRNG()">✕</button>
+    <div class="rng-label">RNG</div>
+    <div class="rng-number" id="rngNum">—</div>
+    <div class="rng-result idle" id="rngResult">กด ROLL</div>
+    <button class="rng-btn" id="rngRollBtn" onclick="rollRNG()">ROLL</button>
   </div>
 </div>
 
@@ -569,6 +597,85 @@ document.getElementById('overlay').addEventListener('mousedown',e=>{if(e.target=
 document.getElementById('go').addEventListener('mousedown',e=>{if(e.target===document.getElementById('go'))closeGTO();});
 document.addEventListener('mouseup',()=>{painting=false;didDrag=false;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeGTO();}});
+
+/* ── RNG ── */
+let rngTimer=null,rngRolling=false;
+
+function toggleRNG(){
+  document.getElementById('rngOverlay').classList.toggle('open');
+  if(document.getElementById('rngOverlay').classList.contains('open')){
+    document.getElementById('rngNum').textContent='—';
+    document.getElementById('rngResult').textContent='กด ROLL';
+    document.getElementById('rngResult').className='rng-result idle';
+  }
+}
+function closeRNG(){
+  document.getElementById('rngOverlay').classList.remove('open');
+  stopSpin();
+}
+
+function startSpin(){
+  rngRolling=true;
+  document.getElementById('rngRollBtn').disabled=true;
+  document.getElementById('rngResult').textContent='';
+  document.getElementById('rngResult').className='rng-result idle';
+  const numEl=document.getElementById('rngNum');
+  const spin=()=>{
+    if(!rngRolling)return;
+    numEl.textContent=Math.floor(Math.random()*101).toString().padStart(2,'0');
+    rngTimer=setTimeout(spin,40);
+  };
+  spin();
+}
+
+function stopSpin(){
+  rngRolling=false;
+  clearTimeout(rngTimer);
+}
+
+function rollRNG(){
+  if(rngRolling){
+    /* กด ROLL ครั้งสอง = หยุด */
+    stopSpin();
+    const final=Math.floor(Math.random()*101);
+    const numEl=document.getElementById('rngNum');
+    const resEl=document.getElementById('rngResult');
+    const btn=document.getElementById('rngRollBtn');
+    /* bounce effect */
+    let bounces=8,interval=40;
+    const bounce=()=>{
+      numEl.textContent=Math.floor(Math.random()*101).toString().padStart(2,'0');
+      bounces--;interval+=18;
+      if(bounces>0){rngTimer=setTimeout(bounce,interval);}
+      else{
+        numEl.textContent=final.toString().padStart(2,'0');
+        if(final>50){
+          resEl.textContent='BET / RAISE';
+          resEl.className='rng-result bet';
+          numEl.style.color='#5ba3ff';
+        } else if(final===50){
+          resEl.textContent='BET / RAISE';
+          resEl.className='rng-result bet';
+          numEl.style.color='#5ba3ff';
+        } else {
+          resEl.textContent='CHECK / CALL';
+          resEl.className='rng-result check';
+          numEl.style.color='#25b07a';
+        }
+        btn.textContent='ROLL';
+        btn.disabled=false;
+      }
+    };
+    bounce();
+  } else {
+    /* กด ROLL ครั้งแรก = เริ่มวิ่ง */
+    document.getElementById('rngNum').style.color='#a78bfa';
+    document.getElementById('rngRollBtn').textContent='STOP';
+    startSpin();
+  }
+}
+
+document.getElementById('rngOverlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('rngOverlay'))closeRNG();});
 
 load();renderNav();renderQA();renderLeg();renderHdrs();
 </script>
