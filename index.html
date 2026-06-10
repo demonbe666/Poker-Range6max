@@ -827,4 +827,75 @@ function parseGTO(txt){
   const res={};
   Object.keys(raw).forEach(h=>{
     const avg=raw[h].sum/raw[h].count;
-    const pct=Math.round(avg*
+    const pct=Math.round(avg*100);
+    if(pct>0)res[h]=pct;
+  });
+  return res;
+}
+function applyGTOAll(){
+  if(!curSpot){alert('กรุณาเลือก spot ก่อน');return;}
+  const set=sets.find(s=>s.id===curSetId);if(!set)return;
+  const actionData={};let totalImported=0;
+  ACTS.forEach(a=>{
+    const txt=document.getElementById('gta_'+a.key)?.value||'';
+    if(txt.trim()){
+      const p=parseGTO(txt);
+      if(Object.keys(p).length){actionData[a.key]=p;totalImported++;}
+    }
+  });
+  if(!totalImported){alert('กรุณา paste range อย่างน้อย 1 action');return;}
+  const allHands=new Set();
+  Object.values(actionData).forEach(p=>Object.keys(p).forEach(h=>allHands.add(h)));
+  let count=0;
+  allHands.forEach(h=>{
+    const nd={r:0,c:0,'3':0,'4':0,'5':0,f:0};
+    ACTS.forEach(a=>{if(actionData[a.key]?.[h]!==undefined)nd[a.key]=actionData[a.key][h];});
+    const tot=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
+    if(tot>100){const scale=100/tot;ACTS.forEach(a=>{nd[a.key]=Math.round((nd[a.key]||0)*scale);});}
+    const tot2=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
+    if(tot2<100&&!(actionData['f']?.[h]>=0))nd['f']=100-tot2;
+    if(ACTS.some(a=>(nd[a.key]||0)>0)){set.data[sk(curSpot,h)]=nd;count++;}
+  });
+  persist();renderGrid();updateStats();renderNav();
+  const el=document.getElementById('gpv');
+  el.textContent=`✓ import ${count} มือ จาก ${totalImported} action`;
+  el.className='gpv ok';
+}
+
+/* ── AUTO RNG ── */
+function startAutoRNG(){stopAutoRNG();doSpin();}
+function stopAutoRNG(){clearTimeout(rngTimer);clearTimeout(rngHoldTimer);rngSpinning=false;}
+function doSpin(){
+  rngSpinning=true;
+  const numEl=document.getElementById('rngN');const resEl=document.getElementById('rngR');
+  if(!numEl)return;
+  numEl.className='rng-num';resEl.className='rng-res';resEl.textContent='';
+  const final=Math.floor(Math.random()*101);
+  let bounces=12,interval=28;
+  const tick=()=>{
+    if(!rngSpinning)return;
+    numEl.textContent=String(Math.floor(Math.random()*101)).padStart(2,'0');
+    bounces--;interval+=15;
+    if(bounces>0){rngTimer=setTimeout(tick,interval);}
+    else{
+      numEl.textContent=String(final).padStart(2,'0');
+      if(final>=50){numEl.className='rng-num bet';resEl.className='rng-res bet';resEl.textContent='BET/RAISE';}
+      else{numEl.className='rng-num check';resEl.className='rng-res check';resEl.textContent='CHECK/CALL';}
+      rngHoldTimer=setTimeout(doSpin,5000);
+    }
+  };tick();
+}
+
+/* ── EVENTS ── */
+document.getElementById('overlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
+document.getElementById('nameOverlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('nameOverlay'))closeNameModal();});
+document.getElementById('go').addEventListener('mousedown',e=>{if(e.target===document.getElementById('go'))closeGTO();});
+document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
+document.addEventListener('mouseup',()=>{painting=false;didDrag=false;});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeGTO();closeNameModal();}});
+
+/* ── INIT ── */
+loadPersist();renderTabs();renderNav();renderQA();renderLeg();renderHdrs();
+</script>
+</body>
+</html>
