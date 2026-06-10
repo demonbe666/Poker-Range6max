@@ -3,13 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>6-Max Preflop Ranges</title>
+<title>8-Max Preflop Ranges</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=IBM+Plex+Sans+Thai:wght@400;500;600&display=swap');
 :root{
   --bg:#0e0f11;--sur:#161819;--sur2:#1e2022;--bor:#2a2d30;
   --tx:#e8eaec;--mu:#7a8088;--di:#444950;--ac:#4a9eff;
-  --cell:42px;--gap:2px;
+  --cell:58px;--gap:3px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-serif;height:100vh;display:flex;flex-direction:column;overflow:hidden}
@@ -43,7 +43,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 
 /* ── BODY ── */
 .body{display:flex;flex:1;overflow:hidden}
-.nav{width:230px;flex-shrink:0;border-right:1px solid var(--bor);display:flex;flex-direction:column;overflow:hidden}
+.nav{width:200px;flex-shrink:0;border-right:1px solid var(--bor);display:flex;flex-direction:column;overflow:hidden}
 .nav-scroll{flex:1;overflow-y:auto;padding:8px 6px}
 .nav-scroll::-webkit-scrollbar{width:3px}
 .nav-scroll::-webkit-scrollbar-thumb{background:var(--bor);border-radius:2px}
@@ -53,7 +53,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .chev{font-size:8px;color:var(--mu);transition:transform .18s;width:10px;flex-shrink:0;display:inline-block}
 .chev.o{transform:rotate(90deg)}
 .tico{font-size:12px;flex-shrink:0}
-.tlbl{font-size:12px;font-weight:500;color:var(--tx);flex:1}
+.tlbl{font-size:13px;font-weight:500;color:var(--tx);flex:1}
 .tc{margin-left:14px;border-left:1px solid var(--bor);padding-left:6px;overflow:hidden;max-height:0;transition:max-height .22s ease}
 .tc.o{max-height:1000px}
 .sg{margin-bottom:1px}
@@ -65,7 +65,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .schev.o{transform:rotate(90deg)}
 .spots{margin-left:10px;border-left:1px solid var(--bor);padding-left:5px;overflow:hidden;max-height:0;transition:max-height .18s ease}
 .spots.o{max-height:800px}
-.si{display:flex;align-items:center;gap:5px;padding:4px 6px;border-radius:4px;cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--mu);transition:all .1s}
+.si{display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'JetBrains Mono',monospace;color:var(--mu);transition:all .1s}
 .si:hover{background:var(--sur2);color:var(--tx)}
 .si.active{background:var(--sur2);color:var(--tx);border-left:2px solid var(--ac);padding-left:4px}
 .si.hd{color:#666}
@@ -77,7 +77,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .qa:hover{background:var(--sur2)}
 .qa.active{background:var(--sur2);border-color:var(--bor)}
 .qadot{width:9px;height:9px;border-radius:2px;flex-shrink:0}
-.qaname{font-size:11px;color:var(--mu)}
+.qaname{font-size:12px;color:var(--mu)}
 .qa.active .qaname{color:var(--tx)}
 .main{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:10px}
 .main::-webkit-scrollbar{width:4px}
@@ -86,31 +86,31 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .wt{font-size:16px;font-weight:500;color:var(--tx);font-family:'JetBrains Mono',monospace}
 .wsub{font-size:11px;line-height:1.9;text-align:center;font-family:'JetBrains Mono',monospace}
 .spot-hdr{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
-.spot-name{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;flex-shrink:0}
-.spot-stats{display:flex;gap:10px;font-size:11px;color:var(--mu);font-family:'JetBrains Mono',monospace;flex-wrap:wrap}
+.spot-name{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:600;flex-shrink:0}
+.spot-stats{display:flex;gap:10px;font-size:12px;color:var(--mu);font-family:'JetBrains Mono',monospace;flex-wrap:wrap}
 .spot-stats span{color:var(--tx)}
 .set-badge{font-size:10px;background:var(--sur2);border:1px solid var(--bor);color:var(--mu);padding:2px 7px;border-radius:4px;font-family:'JetBrains Mono',monospace;white-space:nowrap}
 .hint{font-size:10px;color:var(--di);font-family:'JetBrains Mono',monospace}
 .rh{display:grid;grid-template-columns:repeat(13,var(--cell));gap:var(--gap);margin-bottom:var(--gap);padding-left:18px}
-.rl{text-align:center;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--di)}
+.rl{text-align:center;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--di)}
 .gw{display:flex;gap:var(--gap)}
 .rc{display:flex;flex-direction:column;gap:var(--gap)}
-.rsl{height:var(--cell);width:16px;display:flex;align-items:center;justify-content:center;font-size:9px;font-family:'JetBrains Mono',monospace;color:var(--di)}
+.rsl{height:var(--cell);width:20px;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'JetBrains Mono',monospace;color:var(--di)}
 .grid{display:grid;grid-template-columns:repeat(13,var(--cell));gap:var(--gap)}
 .cell{width:var(--cell);height:var(--cell);position:relative;border-radius:3px;cursor:pointer;overflow:hidden;background:var(--sur);border:1px solid var(--bor);user-select:none;transition:transform .08s,filter .08s}
 .cell:hover{transform:scale(1.1);filter:brightness(1.15);z-index:10}
 .cell svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
-.cl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:8.5px;font-family:'JetBrains Mono',monospace;font-weight:600;color:rgba(255,255,255,.92);pointer-events:none;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.9);letter-spacing:-.3px}
-.leg{display:flex;gap:10px;flex-wrap:wrap;font-size:10px;color:var(--mu);font-family:'JetBrains Mono',monospace}
+.cl{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:600;color:rgba(255,255,255,.92);pointer-events:none;z-index:3;text-shadow:0 1px 3px rgba(0,0,0,.9);letter-spacing:-.3px}
+.leg{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--mu);font-family:'JetBrains Mono',monospace}
 .li{display:flex;align-items:center;gap:4px}
-.ld{width:9px;height:9px;border-radius:2px;flex-shrink:0}
+.ld{width:11px;height:11px;border-radius:2px;flex-shrink:0}
 
 /* RNG inline */
 .rng-wrap{display:flex;flex-direction:column;align-items:center;background:#0a0a14;border:1px solid #2a2a4a;border-radius:8px;padding:8px 16px;gap:2px;min-width:100px;flex-shrink:0}
-.rng-num{font-family:'JetBrains Mono',monospace;font-size:38px;font-weight:600;line-height:1;color:#a78bfa;min-width:2ch;text-align:center}
+.rng-num{font-family:'JetBrains Mono',monospace;font-size:44px;font-weight:600;line-height:1;color:#a78bfa;min-width:2ch;text-align:center}
 .rng-num.bet{color:#5ba3ff}
 .rng-num.check{color:#25b07a}
-.rng-res{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1px;color:var(--di);min-height:14px;text-align:center}
+.rng-res{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;letter-spacing:1px;color:var(--di);min-height:14px;text-align:center}
 .rng-res.bet{color:#5ba3ff}
 .rng-res.check{color:#25b07a}
 
@@ -168,7 +168,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 
 <!-- TOPBAR -->
 <div class="topbar">
-  <div class="app-title">6-MAX PREFLOP</div>
+  <div class="app-title">8-MAX PREFLOP</div>
   <div class="breadcrumb" id="bc"><span class="bc-item active">เลือก spot จากเมนูซ้าย</span></div>
   <div class="topbar-right">
     <button class="tbtn gto" onclick="openGTO()">Import GTO Wizard</button>
@@ -193,7 +193,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
   </div>
   <div class="main" id="main">
     <div class="welcome" id="wel">
-      <div class="wt">6-MAX PREFLOP RANGES</div>
+      <div class="wt">8-MAX PREFLOP RANGES</div>
       <div class="wsub" style="color:var(--mu)">เลือก spot จากเมนูซ้าย<br>คลิกช่อง = ตั้ง % mixed &nbsp;|&nbsp; ลากผ่าน = paint 100%</div>
     </div>
     <div id="rv" style="display:none;flex-direction:column;gap:10px">
@@ -271,59 +271,98 @@ const ACTS=[
 ];
 const TREE=[
   {id:'rfi',label:'RFI',ico:'🂠',flat:[
-    {id:'rfi_utg',label:'UTG'},{id:'rfi_hj',label:'HJ'},{id:'rfi_co',label:'CO'},
+    {id:'rfi_utg',label:'UTG'},{id:'rfi_utg1',label:'UTG+1'},
+    {id:'rfi_utg2',label:'UTG+2'},{id:'rfi_lj',label:'LJ'},
+    {id:'rfi_hj',label:'HJ'},{id:'rfi_co',label:'CO'},
     {id:'rfi_btn',label:'BTN'},{id:'rfi_sb',label:'SB'},
   ]},
   {id:'vsrfi',label:'vs RFI',ico:'↩',subs:[
     {id:'vsrfi_call',label:'Call',spots:[
-      {id:'call_bb_utg',label:'BB vs UTG'},{id:'call_bb_hj',label:'BB vs HJ'},
-      {id:'call_bb_co',label:'BB vs CO'},{id:'call_bb_btn',label:'BB vs BTN'},
-      {id:'call_bb_sb',label:'BB vs SB'},{id:'call_sb_utg',label:'SB vs UTG'},
+      {id:'call_bb_utg',label:'BB vs UTG'},{id:'call_bb_utg1',label:'BB vs UTG+1'},
+      {id:'call_bb_utg2',label:'BB vs UTG+2'},{id:'call_bb_lj',label:'BB vs LJ'},
+      {id:'call_bb_hj',label:'BB vs HJ'},{id:'call_bb_co',label:'BB vs CO'},
+      {id:'call_bb_btn',label:'BB vs BTN'},{id:'call_bb_sb',label:'BB vs SB'},
+      {id:'call_sb_utg',label:'SB vs UTG'},{id:'call_sb_utg1',label:'SB vs UTG+1'},
+      {id:'call_sb_utg2',label:'SB vs UTG+2'},{id:'call_sb_lj',label:'SB vs LJ'},
       {id:'call_sb_hj',label:'SB vs HJ'},{id:'call_sb_co',label:'SB vs CO'},
-      {id:'call_sb_btn',label:'SB vs BTN'},{id:'call_btn_utg',label:'BTN vs UTG'},
+      {id:'call_sb_btn',label:'SB vs BTN'},
+      {id:'call_btn_utg',label:'BTN vs UTG'},{id:'call_btn_utg1',label:'BTN vs UTG+1'},
+      {id:'call_btn_utg2',label:'BTN vs UTG+2'},{id:'call_btn_lj',label:'BTN vs LJ'},
       {id:'call_btn_hj',label:'BTN vs HJ'},{id:'call_btn_co',label:'BTN vs CO'},
-      {id:'call_co_utg',label:'CO vs UTG'},{id:'call_co_hj',label:'CO vs HJ'},
-      {id:'call_hj_utg',label:'HJ vs UTG'},
+      {id:'call_co_utg',label:'CO vs UTG'},{id:'call_co_utg1',label:'CO vs UTG+1'},
+      {id:'call_co_utg2',label:'CO vs UTG+2'},{id:'call_co_lj',label:'CO vs LJ'},
+      {id:'call_co_hj',label:'CO vs HJ'},
+      {id:'call_hj_utg',label:'HJ vs UTG'},{id:'call_hj_utg1',label:'HJ vs UTG+1'},
+      {id:'call_hj_utg2',label:'HJ vs UTG+2'},{id:'call_hj_lj',label:'HJ vs LJ'},
+      {id:'call_lj_utg',label:'LJ vs UTG'},{id:'call_lj_utg1',label:'LJ vs UTG+1'},
+      {id:'call_lj_utg2',label:'LJ vs UTG+2'},
+      {id:'call_utg2_utg',label:'UTG+2 vs UTG'},{id:'call_utg2_utg1',label:'UTG+2 vs UTG+1'},
+      {id:'call_utg1_utg',label:'UTG+1 vs UTG'},
     ]},
     {id:'vsrfi_3bet',label:'3Bet',spots:[
-      {id:'3b_bb_utg',label:'BB vs UTG'},{id:'3b_bb_hj',label:'BB vs HJ'},
-      {id:'3b_bb_co',label:'BB vs CO'},{id:'3b_bb_btn',label:'BB vs BTN'},
-      {id:'3b_bb_sb',label:'BB vs SB'},{id:'3b_sb_utg',label:'SB vs UTG'},
+      {id:'3b_bb_utg',label:'BB vs UTG'},{id:'3b_bb_utg1',label:'BB vs UTG+1'},
+      {id:'3b_bb_utg2',label:'BB vs UTG+2'},{id:'3b_bb_lj',label:'BB vs LJ'},
+      {id:'3b_bb_hj',label:'BB vs HJ'},{id:'3b_bb_co',label:'BB vs CO'},
+      {id:'3b_bb_btn',label:'BB vs BTN'},{id:'3b_bb_sb',label:'BB vs SB'},
+      {id:'3b_sb_utg',label:'SB vs UTG'},{id:'3b_sb_utg1',label:'SB vs UTG+1'},
+      {id:'3b_sb_utg2',label:'SB vs UTG+2'},{id:'3b_sb_lj',label:'SB vs LJ'},
       {id:'3b_sb_hj',label:'SB vs HJ'},{id:'3b_sb_co',label:'SB vs CO'},
-      {id:'3b_sb_btn',label:'SB vs BTN'},{id:'3b_btn_utg',label:'BTN vs UTG'},
+      {id:'3b_sb_btn',label:'SB vs BTN'},
+      {id:'3b_btn_utg',label:'BTN vs UTG'},{id:'3b_btn_utg1',label:'BTN vs UTG+1'},
+      {id:'3b_btn_utg2',label:'BTN vs UTG+2'},{id:'3b_btn_lj',label:'BTN vs LJ'},
       {id:'3b_btn_hj',label:'BTN vs HJ'},{id:'3b_btn_co',label:'BTN vs CO'},
-      {id:'3b_co_utg',label:'CO vs UTG'},{id:'3b_co_hj',label:'CO vs HJ'},
-      {id:'3b_hj_utg',label:'HJ vs UTG'},
+      {id:'3b_co_utg',label:'CO vs UTG'},{id:'3b_co_utg1',label:'CO vs UTG+1'},
+      {id:'3b_co_utg2',label:'CO vs UTG+2'},{id:'3b_co_lj',label:'CO vs LJ'},
+      {id:'3b_co_hj',label:'CO vs HJ'},
+      {id:'3b_hj_utg',label:'HJ vs UTG'},{id:'3b_hj_utg1',label:'HJ vs UTG+1'},
+      {id:'3b_hj_utg2',label:'HJ vs UTG+2'},{id:'3b_hj_lj',label:'HJ vs LJ'},
+      {id:'3b_lj_utg',label:'LJ vs UTG'},{id:'3b_lj_utg1',label:'LJ vs UTG+1'},
+      {id:'3b_lj_utg2',label:'LJ vs UTG+2'},
+      {id:'3b_utg2_utg',label:'UTG+2 vs UTG'},{id:'3b_utg2_utg1',label:'UTG+2 vs UTG+1'},
+      {id:'3b_utg1_utg',label:'UTG+1 vs UTG'},
     ]},
   ]},
   {id:'vs3bet',label:'vs 3Bet',ico:'↩↩',subs:[
     {id:'vs3_call',label:'Call 3Bet',spots:[
-      {id:'c3_utg_bb',label:'UTG vs BB 3Bet'},{id:'c3_utg_sb',label:'UTG vs SB 3Bet'},
-      {id:'c3_hj_bb',label:'HJ vs BB 3Bet'},{id:'c3_hj_sb',label:'HJ vs SB 3Bet'},
-      {id:'c3_hj_btn',label:'HJ vs BTN 3Bet'},{id:'c3_co_bb',label:'CO vs BB 3Bet'},
-      {id:'c3_co_sb',label:'CO vs SB 3Bet'},{id:'c3_co_btn',label:'CO vs BTN 3Bet'},
-      {id:'c3_btn_bb',label:'BTN vs BB 3Bet'},{id:'c3_btn_sb',label:'BTN vs SB 3Bet'},
-      {id:'c3_sb_bb',label:'SB vs BB 3Bet'},
+      {id:'c3_utg_bb',label:'UTG vs BB'},{id:'c3_utg_sb',label:'UTG vs SB'},
+      {id:'c3_utg_btn',label:'UTG vs BTN'},{id:'c3_utg_co',label:'UTG vs CO'},
+      {id:'c3_utg1_bb',label:'UTG+1 vs BB'},{id:'c3_utg1_sb',label:'UTG+1 vs SB'},
+      {id:'c3_utg1_btn',label:'UTG+1 vs BTN'},{id:'c3_utg2_bb',label:'UTG+2 vs BB'},
+      {id:'c3_utg2_sb',label:'UTG+2 vs SB'},{id:'c3_utg2_btn',label:'UTG+2 vs BTN'},
+      {id:'c3_lj_bb',label:'LJ vs BB'},{id:'c3_lj_sb',label:'LJ vs SB'},
+      {id:'c3_lj_btn',label:'LJ vs BTN'},{id:'c3_hj_bb',label:'HJ vs BB'},
+      {id:'c3_hj_sb',label:'HJ vs SB'},{id:'c3_hj_btn',label:'HJ vs BTN'},
+      {id:'c3_co_bb',label:'CO vs BB'},{id:'c3_co_sb',label:'CO vs SB'},
+      {id:'c3_co_btn',label:'CO vs BTN'},{id:'c3_btn_bb',label:'BTN vs BB'},
+      {id:'c3_btn_sb',label:'BTN vs SB'},{id:'c3_sb_bb',label:'SB vs BB'},
     ]},
     {id:'vs3_4bet',label:'4Bet',spots:[
-      {id:'4b_utg_bb',label:'UTG vs BB 3Bet'},{id:'4b_utg_sb',label:'UTG vs SB 3Bet'},
-      {id:'4b_hj_bb',label:'HJ vs BB 3Bet'},{id:'4b_hj_sb',label:'HJ vs SB 3Bet'},
-      {id:'4b_hj_btn',label:'HJ vs BTN 3Bet'},{id:'4b_co_bb',label:'CO vs BB 3Bet'},
-      {id:'4b_co_sb',label:'CO vs SB 3Bet'},{id:'4b_co_btn',label:'CO vs BTN 3Bet'},
-      {id:'4b_btn_bb',label:'BTN vs BB 3Bet'},{id:'4b_btn_sb',label:'BTN vs SB 3Bet'},
-      {id:'4b_sb_bb',label:'SB vs BB 3Bet'},
+      {id:'4b_utg_bb',label:'UTG vs BB'},{id:'4b_utg_sb',label:'UTG vs SB'},
+      {id:'4b_utg_btn',label:'UTG vs BTN'},{id:'4b_utg_co',label:'UTG vs CO'},
+      {id:'4b_utg1_bb',label:'UTG+1 vs BB'},{id:'4b_utg1_sb',label:'UTG+1 vs SB'},
+      {id:'4b_utg2_bb',label:'UTG+2 vs BB'},{id:'4b_utg2_sb',label:'UTG+2 vs SB'},
+      {id:'4b_lj_bb',label:'LJ vs BB'},{id:'4b_lj_sb',label:'LJ vs SB'},
+      {id:'4b_lj_btn',label:'LJ vs BTN'},{id:'4b_hj_bb',label:'HJ vs BB'},
+      {id:'4b_hj_sb',label:'HJ vs SB'},{id:'4b_hj_btn',label:'HJ vs BTN'},
+      {id:'4b_co_bb',label:'CO vs BB'},{id:'4b_co_sb',label:'CO vs SB'},
+      {id:'4b_co_btn',label:'CO vs BTN'},{id:'4b_btn_bb',label:'BTN vs BB'},
+      {id:'4b_btn_sb',label:'BTN vs SB'},{id:'4b_sb_bb',label:'SB vs BB'},
     ]},
   ]},
   {id:'vs4bet',label:'vs 4Bet',ico:'↩↩↩',subs:[
     {id:'vs4_call',label:'Call 4Bet',spots:[
-      {id:'c4_bb_utg',label:'BB vs UTG 4Bet'},{id:'c4_bb_hj',label:'BB vs HJ 4Bet'},
-      {id:'c4_bb_co',label:'BB vs CO 4Bet'},{id:'c4_bb_btn',label:'BB vs BTN 4Bet'},
-      {id:'c4_bb_sb',label:'BB vs SB 4Bet'},{id:'c4_sb_btn',label:'SB vs BTN 4Bet'},
-      {id:'c4_sb_co',label:'SB vs CO 4Bet'},{id:'c4_btn_bb',label:'BTN vs BB 4Bet'},
+      {id:'c4_bb_utg',label:'BB vs UTG 4Bet'},{id:'c4_bb_utg1',label:'BB vs UTG+1 4Bet'},
+      {id:'c4_bb_utg2',label:'BB vs UTG+2 4Bet'},{id:'c4_bb_lj',label:'BB vs LJ 4Bet'},
+      {id:'c4_bb_hj',label:'BB vs HJ 4Bet'},{id:'c4_bb_co',label:'BB vs CO 4Bet'},
+      {id:'c4_bb_btn',label:'BB vs BTN 4Bet'},{id:'c4_bb_sb',label:'BB vs SB 4Bet'},
+      {id:'c4_sb_btn',label:'SB vs BTN 4Bet'},{id:'c4_sb_co',label:'SB vs CO 4Bet'},
+      {id:'c4_sb_hj',label:'SB vs HJ 4Bet'},{id:'c4_btn_bb',label:'BTN vs BB 4Bet'},
       {id:'c4_btn_sb',label:'BTN vs SB 4Bet'},{id:'c4_co_bb',label:'CO vs BB 4Bet'},
+      {id:'c4_co_sb',label:'CO vs SB 4Bet'},{id:'c4_hj_bb',label:'HJ vs BB 4Bet'},
     ]},
     {id:'vs4_5bet',label:'5Bet/Shove',spots:[
-      {id:'5b_bb_utg',label:'BB vs UTG 4Bet'},{id:'5b_bb_hj',label:'BB vs HJ 4Bet'},
+      {id:'5b_bb_utg',label:'BB vs UTG 4Bet'},{id:'5b_bb_utg1',label:'BB vs UTG+1 4Bet'},
+      {id:'5b_bb_lj',label:'BB vs LJ 4Bet'},{id:'5b_bb_hj',label:'BB vs HJ 4Bet'},
       {id:'5b_bb_co',label:'BB vs CO 4Bet'},{id:'5b_bb_btn',label:'BB vs BTN 4Bet'},
       {id:'5b_sb_btn',label:'SB vs BTN 4Bet'},{id:'5b_btn_bb',label:'BTN vs BB 4Bet'},
       {id:'5b_co_bb',label:'CO vs BB 4Bet'},
@@ -331,15 +370,18 @@ const TREE=[
   ]},
   {id:'squeeze',label:'Squeeze',ico:'⚡',subs:[
     {id:'sq_range',label:'Squeeze Range',spots:[
-      {id:'sq_bb_utg',label:'BB vs UTG+call'},{id:'sq_bb_hj',label:'BB vs HJ+call'},
-      {id:'sq_bb_co',label:'BB vs CO+call'},{id:'sq_bb_btn',label:'BB vs BTN+call'},
-      {id:'sq_sb_btn',label:'SB vs BTN+call'},{id:'sq_btn_co',label:'BTN vs CO+call'},
+      {id:'sq_bb_utg',label:'BB vs UTG+call'},{id:'sq_bb_utg1',label:'BB vs UTG+1+call'},
+      {id:'sq_bb_utg2',label:'BB vs UTG+2+call'},{id:'sq_bb_lj',label:'BB vs LJ+call'},
+      {id:'sq_bb_hj',label:'BB vs HJ+call'},{id:'sq_bb_co',label:'BB vs CO+call'},
+      {id:'sq_bb_btn',label:'BB vs BTN+call'},{id:'sq_sb_btn',label:'SB vs BTN+call'},
+      {id:'sq_sb_co',label:'SB vs CO+call'},{id:'sq_btn_co',label:'BTN vs CO+call'},
       {id:'sq_co_hj',label:'CO vs HJ+call'},
     ]},
     {id:'sq_vs',label:'vs Squeeze',spots:[
-      {id:'vsq_utg',label:'UTG vs Squeeze'},{id:'vsq_hj',label:'HJ vs Squeeze'},
-      {id:'vsq_co',label:'CO vs Squeeze'},{id:'vsq_btn',label:'BTN vs Squeeze'},
-      {id:'vsq_caller',label:'Caller vs Squeeze'},
+      {id:'vsq_utg',label:'UTG vs Squeeze'},{id:'vsq_utg1',label:'UTG+1 vs Squeeze'},
+      {id:'vsq_utg2',label:'UTG+2 vs Squeeze'},{id:'vsq_lj',label:'LJ vs Squeeze'},
+      {id:'vsq_hj',label:'HJ vs Squeeze'},{id:'vsq_co',label:'CO vs Squeeze'},
+      {id:'vsq_btn',label:'BTN vs Squeeze'},{id:'vsq_caller',label:'Caller vs Squeeze'},
     ]},
   ]},
   {id:'limp',label:'Limp / vs Limp',ico:'◌',flat:[
@@ -581,7 +623,7 @@ function renderHdrs(){
 
 /* ── GRID ── */
 function svgCell(segs){
-  const W=42,H=42;
+  const W=58,H=58;
   if(!segs||!segs.length)return'';
   if(segs.length===1)return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="${segs[0].color}"/></svg>`;
   const s0=segs[0],s1=segs[1],ratio=s0.pct/(s0.pct+s1.pct);
@@ -785,75 +827,4 @@ function parseGTO(txt){
   const res={};
   Object.keys(raw).forEach(h=>{
     const avg=raw[h].sum/raw[h].count;
-    const pct=Math.round(avg*100);
-    if(pct>0)res[h]=pct;
-  });
-  return res;
-}
-function applyGTOAll(){
-  if(!curSpot){alert('กรุณาเลือก spot ก่อน');return;}
-  const set=sets.find(s=>s.id===curSetId);if(!set)return;
-  const actionData={};let totalImported=0;
-  ACTS.forEach(a=>{
-    const txt=document.getElementById('gta_'+a.key)?.value||'';
-    if(txt.trim()){
-      const p=parseGTO(txt);
-      if(Object.keys(p).length){actionData[a.key]=p;totalImported++;}
-    }
-  });
-  if(!totalImported){alert('กรุณา paste range อย่างน้อย 1 action');return;}
-  const allHands=new Set();
-  Object.values(actionData).forEach(p=>Object.keys(p).forEach(h=>allHands.add(h)));
-  let count=0;
-  allHands.forEach(h=>{
-    const nd={r:0,c:0,'3':0,'4':0,'5':0,f:0};
-    ACTS.forEach(a=>{if(actionData[a.key]?.[h]!==undefined)nd[a.key]=actionData[a.key][h];});
-    const tot=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
-    if(tot>100){const scale=100/tot;ACTS.forEach(a=>{nd[a.key]=Math.round((nd[a.key]||0)*scale);});}
-    const tot2=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
-    if(tot2<100&&!(actionData['f']?.[h]>=0))nd['f']=100-tot2;
-    if(ACTS.some(a=>(nd[a.key]||0)>0)){set.data[sk(curSpot,h)]=nd;count++;}
-  });
-  persist();renderGrid();updateStats();renderNav();
-  const el=document.getElementById('gpv');
-  el.textContent=`✓ import ${count} มือ จาก ${totalImported} action`;
-  el.className='gpv ok';
-}
-
-/* ── AUTO RNG ── */
-function startAutoRNG(){stopAutoRNG();doSpin();}
-function stopAutoRNG(){clearTimeout(rngTimer);clearTimeout(rngHoldTimer);rngSpinning=false;}
-function doSpin(){
-  rngSpinning=true;
-  const numEl=document.getElementById('rngN');const resEl=document.getElementById('rngR');
-  if(!numEl)return;
-  numEl.className='rng-num';resEl.className='rng-res';resEl.textContent='';
-  const final=Math.floor(Math.random()*101);
-  let bounces=12,interval=28;
-  const tick=()=>{
-    if(!rngSpinning)return;
-    numEl.textContent=String(Math.floor(Math.random()*101)).padStart(2,'0');
-    bounces--;interval+=15;
-    if(bounces>0){rngTimer=setTimeout(tick,interval);}
-    else{
-      numEl.textContent=String(final).padStart(2,'0');
-      if(final>=50){numEl.className='rng-num bet';resEl.className='rng-res bet';resEl.textContent='BET/RAISE';}
-      else{numEl.className='rng-num check';resEl.className='rng-res check';resEl.textContent='CHECK/CALL';}
-      rngHoldTimer=setTimeout(doSpin,5000);
-    }
-  };tick();
-}
-
-/* ── EVENTS ── */
-document.getElementById('overlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
-document.getElementById('nameOverlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('nameOverlay'))closeNameModal();});
-document.getElementById('go').addEventListener('mousedown',e=>{if(e.target===document.getElementById('go'))closeGTO();});
-document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
-document.addEventListener('mouseup',()=>{painting=false;didDrag=false;});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeGTO();closeNameModal();}});
-
-/* ── INIT ── */
-loadPersist();renderTabs();renderNav();renderQA();renderLeg();renderHdrs();
-</script>
-</body>
-</html>
+    const pct=Math.round(avg*
