@@ -153,6 +153,15 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .gta:focus{border-color:var(--ac)}
 .gpv{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);min-height:13px;margin-bottom:9px}
 .gpv.ok{color:#25b07a}.gpv.err{color:#d44040}
+.gto-field{margin-bottom:10px}
+.gto-field-header{display:flex;align-items:center;gap:7px;margin-bottom:5px}
+.gto-field-dot{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.gto-field-label{font-size:11px;font-weight:500}
+.gto-field-count{font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--mu);margin-left:auto}
+.gto-field-count.ok{color:#25b07a}
+.gto-ta{width:100%;height:58px;background:var(--sur2);border:1px solid var(--bor);border-radius:5px;color:var(--tx);padding:6px 8px;font-family:'JetBrains Mono',monospace;font-size:10px;resize:none;outline:none;transition:border-color .15s}
+.gto-ta:focus{border-color:var(--ac)}
+.gto-ta.has-data{border-color:#2d6e2d;background:#0d1a0d}
 </style>
 </head>
 <body>
@@ -236,19 +245,16 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
   </div>
 </div>
 
-<!-- GTO Modal -->
+<!-- GTO Modal — Multi Action -->
 <div class="go" id="go">
-  <div class="gm">
+  <div class="gm" style="width:560px;max-height:90vh;overflow-y:auto">
     <h3>Import จาก GTO Wizard / PioSOLVER</h3>
-    <div class="gsub">Ranges Tab → dropdown เลือก action → กด <code>Copy</code> → paste ด้านล่าง</div>
-    <div style="font-size:10px;color:var(--mu);margin-bottom:5px;font-family:'JetBrains Mono',monospace">Import เป็น action:</div>
-    <div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:9px" id="gap2"></div>
-    <textarea class="gta" id="gta" placeholder="Paste range text ที่นี่...&#10;เช่น: AA:1,KK:1,QQ:0.75,AKs:0.5"></textarea>
-    <div class="gpv" id="gpv">— paste แล้วกด Preview —</div>
-    <div class="mbtns">
+    <div class="gsub">Ranges Tab → dropdown เลือก action → กด <code>Copy</code> → paste ในช่องที่ตรงกัน<br>ใส่แค่ action ที่ต้องการ ไม่จำเป็นต้องครบทุกช่อง</div>
+    <div id="gtoAllFields"></div>
+    <div class="gpv" id="gpv" style="margin-top:6px">—</div>
+    <div class="mbtns" style="margin-top:10px">
       <button class="mb" onclick="closeGTO()">ยกเลิก</button>
-      <button class="mb" onclick="prevGTO()" style="border-color:#555">Preview</button>
-      <button class="mb p" onclick="applyGTO()">Import เข้า spot นี้</button>
+      <button class="mb p" onclick="applyGTOAll()">Import ทั้งหมด</button>
     </div>
   </div>
 </div>
@@ -679,59 +685,139 @@ function applyModal(){
   closeModal();renderGrid();updateStats();renderNav();persist();
 }
 
-/* ── GTO IMPORT ── */
+/* ── GTO IMPORT (multi-action) ── */
 function openGTO(){
-  gAct=curAct;renderGTOPicker();
-  document.getElementById('gta').value='';
-  document.getElementById('gpv').textContent='— paste แล้วกด Preview —';
+  document.getElementById('gpv').textContent='—';
   document.getElementById('gpv').className='gpv';
+  renderGTOFields();
   document.getElementById('go').classList.add('open');
 }
 function closeGTO(){document.getElementById('go').classList.remove('open');}
-function renderGTOPicker(){
-  const el=document.getElementById('gap2');el.innerHTML='';
+function renderGTOFields(){
+  const el=document.getElementById('gtoAllFields');el.innerHTML='';
   ACTS.forEach(a=>{
-    const b=document.createElement('button');b.className='mb'+(a.key===gAct?' p':'');
-    b.style.cssText='display:flex;align-items:center;gap:4px;font-size:11px;padding:3px 8px';
-    b.innerHTML=`<span style="width:8px;height:8px;border-radius:2px;background:${a.color};display:inline-block"></span>${a.label}`;
-    b.onclick=()=>{gAct=a.key;renderGTOPicker();};el.appendChild(b);
+    const wrap=document.createElement('div');wrap.className='gto-field';
+    const hdr=document.createElement('div');hdr.className='gto-field-header';
+    hdr.innerHTML=`<span class="gto-field-dot" style="background:${a.color}"></span>
+      <span class="gto-field-label">${a.label}</span>
+      <span class="gto-field-count" id="gtocnt_${a.key}"></span>`;
+    const ta=document.createElement('textarea');
+    ta.className='gto-ta';ta.id='gta_'+a.key;
+    ta.placeholder=`Paste ${a.label} range จาก GTO Wizard...`;
+    ta.addEventListener('input',()=>{
+      const txt=ta.value.trim();
+      const cnt=document.getElementById('gtocnt_'+a.key);
+      if(txt){
+        const p=parseGTO(txt);const n=Object.keys(p).length;
+        cnt.textContent=n?`✓ ${n} มือ`:'✗ parse ไม่ได้';
+        cnt.className='gto-field-count'+(n?' ok':'');
+        ta.className='gto-ta'+(n?' has-data':'');
+      } else {cnt.textContent='';ta.className='gto-ta';}
+    });
+    wrap.appendChild(hdr);wrap.appendChild(ta);el.appendChild(wrap);
   });
 }
 function parseGTO(txt){
+  if(!txt.trim())return{};
+
+  const RANK_ORDER='AKQJT98765432';
+  const rankOf=c=>RANK_ORDER.indexOf(c.toUpperCase());
+  const normRank=c=>c==='T'?'T':c.toUpperCase();
+
+  /* parse all tokens — support both "AsKs:0.75" and "AKs:0.75" and "AA,KK" */
+  const raw={};  /* key=169hand, value={sum,count} */
+
+  const tokens=txt.replace(/\r\n/g,'\n').split(/[\n,]+/).map(t=>t.trim()).filter(t=>t);
+
+  tokens.forEach(tok=>{
+    if(!tok)return;
+    let hand='', freq=1;
+    if(tok.includes(':')){
+      const idx=tok.lastIndexOf(':');
+      hand=tok.slice(0,idx).trim();
+      freq=Math.min(1,Math.max(0,parseFloat(tok.slice(idx+1))||0));
+    } else {
+      hand=tok.trim(); freq=1;
+    }
+
+    /* ── specific card format: AsKs, AhKc, TsTd, etc. ── */
+    const specific=hand.match(/^([AKQJT2-9])([cdhs])([AKQJT2-9])([cdhs])$/i);
+    if(specific){
+      let r1=normRank(specific[1]), s1=specific[2].toLowerCase();
+      let r2=normRank(specific[3]), s2=specific[4].toLowerCase();
+      /* sort higher rank first */
+      if(rankOf(r1)>rankOf(r2)){[r1,r2]=[r2,r1];[s1,s2]=[s2,s1];}
+      let h169;
+      if(r1===r2){h169=r1+r2;}           /* pair */
+      else if(s1===s2){h169=r1+r2+'s';}  /* suited */
+      else{h169=r1+r2+'o';}              /* offsuit */
+      if(!raw[h169])raw[h169]={sum:0,count:0};
+      raw[h169].sum+=freq; raw[h169].count++;
+      return;
+    }
+
+    /* ── standard 169 format: AA, AKs, AKo, AK ── */
+    const std=hand.match(/^([AKQJT2-9])([AKQJT2-9])([so]?)$/i);
+    if(std){
+      let r1=normRank(std[1]),r2=normRank(std[2]),suit=std[3].toLowerCase();
+      if(rankOf(r1)>rankOf(r2))[r1,r2]=[r2,r1];
+      if(r1===r2){
+        /* pair */
+        const h=r1+r2;
+        if(!raw[h])raw[h]={sum:0,count:0};
+        raw[h].sum+=freq;raw[h].count++;
+      } else if(suit==='s'||suit==='o'){
+        const h=r1+r2+suit;
+        if(!raw[h])raw[h]={sum:0,count:0};
+        raw[h].sum+=freq;raw[h].count++;
+      } else {
+        /* no suit — add both */
+        ['s','o'].forEach(s=>{
+          const h=r1+r2+s;
+          if(!raw[h])raw[h]={sum:0,count:0};
+          raw[h].sum+=freq;raw[h].count++;
+        });
+      }
+    }
+  });
+
+  /* aggregate: average frequency per 169 hand */
   const res={};
-  txt.replace(/\r/g,'').replace(/\n/g,',').replace(/\s+/g,'').split(',').filter(t=>t).forEach(tok=>{
-    let h='',freq=1;
-    if(tok.includes(':')){const p=tok.split(':');h=p[0];freq=Math.min(1,Math.max(0,parseFloat(p[1])||0));}
-    else{h=tok;freq=1;}
-    const exp=h=>{const r1=h[0],r2=h[1]||'';if(!r2||h.endsWith('s')||h.endsWith('o')||r1===r2)return[h];return[r1+r2+'s',r1+r2+'o'];};
-    exp(h).forEach(x=>{if(x.length>=2)res[x]=Math.round(freq*100);});
+  Object.keys(raw).forEach(h=>{
+    const avg=raw[h].sum/raw[h].count;
+    const pct=Math.round(avg*100);
+    if(pct>0)res[h]=pct;
   });
   return res;
 }
-function prevGTO(){
-  const p=parseGTO(document.getElementById('gta').value);
-  const keys=Object.keys(p);const el=document.getElementById('gpv');
-  if(!keys.length){el.textContent='✗ ไม่พบมือที่ parse ได้';el.className='gpv err';return;}
-  el.textContent=`✓ พบ ${keys.length} มือ — ${keys.slice(0,5).map(k=>`${k}:${p[k]}%`).join(', ')}${keys.length>5?'…':''}`;
-  el.className='gpv ok';
-}
-function applyGTO(){
+function applyGTOAll(){
   if(!curSpot){alert('กรุณาเลือก spot ก่อน');return;}
-  const p=parseGTO(document.getElementById('gta').value);
-  const keys=Object.keys(p);if(!keys.length){alert('ไม่พบมือที่ parse ได้');return;}
   const set=sets.find(s=>s.id===curSetId);if(!set)return;
-  keys.forEach(h=>{
-    const freq=p[h];if(freq===0)return;
-    const ex=set.data[sk(curSpot,h)]||{r:0,c:0,'3':0,'4':0,'5':0,f:0};
-    const otTot=ACTS.filter(a=>a.key!==gAct).reduce((s,a)=>s+(ex[a.key]||0),0);
-    const rem=100-freq;const nd={...ex};nd[gAct]=freq;
-    if(otTot>0){ACTS.filter(a=>a.key!==gAct).forEach(a=>{nd[a.key]=Math.round(((ex[a.key]||0)/otTot)*rem);});}
-    else{ACTS.filter(a=>a.key!==gAct).forEach(a=>nd[a.key]=0);if(gAct!=='f')nd['f']=rem;}
-    const tot2=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
-    if(tot2>100)nd[gAct]=Math.max(0,nd[gAct]-(tot2-100));
-    set.data[sk(curSpot,h)]=nd;
+  const actionData={};let totalImported=0;
+  ACTS.forEach(a=>{
+    const txt=document.getElementById('gta_'+a.key)?.value||'';
+    if(txt.trim()){
+      const p=parseGTO(txt);
+      if(Object.keys(p).length){actionData[a.key]=p;totalImported++;}
+    }
   });
-  persist();renderGrid();updateStats();renderNav();closeGTO();ss(`✓ ${keys.length} มือ`);
+  if(!totalImported){alert('กรุณา paste range อย่างน้อย 1 action');return;}
+  const allHands=new Set();
+  Object.values(actionData).forEach(p=>Object.keys(p).forEach(h=>allHands.add(h)));
+  let count=0;
+  allHands.forEach(h=>{
+    const nd={r:0,c:0,'3':0,'4':0,'5':0,f:0};
+    ACTS.forEach(a=>{if(actionData[a.key]?.[h]!==undefined)nd[a.key]=actionData[a.key][h];});
+    const tot=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
+    if(tot>100){const scale=100/tot;ACTS.forEach(a=>{nd[a.key]=Math.round((nd[a.key]||0)*scale);});}
+    const tot2=ACTS.reduce((s,a)=>s+(nd[a.key]||0),0);
+    if(tot2<100&&!(actionData['f']?.[h]>=0))nd['f']=100-tot2;
+    if(ACTS.some(a=>(nd[a.key]||0)>0)){set.data[sk(curSpot,h)]=nd;count++;}
+  });
+  persist();renderGrid();updateStats();renderNav();
+  const el=document.getElementById('gpv');
+  el.textContent=`✓ import ${count} มือ จาก ${totalImported} action`;
+  el.className='gpv ok';
 }
 
 /* ── AUTO RNG ── */
