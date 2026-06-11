@@ -70,6 +70,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .si.active{background:var(--sur2);color:var(--tx);border-left:2px solid var(--ac);padding-left:4px}
 .si.hd{color:#666}
 .sdot{width:5px;height:5px;border-radius:50%;background:var(--di);flex-shrink:0}
+.fav-star{background:none;border:none;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:color .15s}
 .sdot.f{background:#25b07a}
 .nav-bot{padding:8px 6px;border-top:1px solid var(--bor);flex-shrink:0}
 .ql{font-size:9px;color:var(--di);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
@@ -270,6 +271,7 @@ const ACTS=[
   {key:'f',label:'Fold',color:'#555b63'},
 ];
 const TREE=[
+  {id:'__favs__',label:'Favorites',ico:'★',flat:[]},
   {id:'rfi',label:'RFI',ico:'🂠',flat:[
     {id:'rfi_utg',label:'UTG'},{id:'rfi_utg1',label:'UTG+1'},
     {id:'rfi_utg2',label:'UTG+2'},{id:'rfi_lj',label:'LJ'},
@@ -392,6 +394,7 @@ const TREE=[
 
 /* ── STATE ── */
 let sets=[];        // [{id, name, data:{}}]
+let favorites=[];   // [spotId, ...]
 let curSetId=null;
 let curSpot=null, curAct='r', painting=false, didDrag=false;
 let mHand=null, mSpot=null, mVals={};
@@ -410,12 +413,12 @@ function genId(){return Date.now().toString(36)+Math.random().toString(36).slice
 
 /* ── STORAGE ── */
 function persist(){
-  try{localStorage.setItem('pkr6sets',JSON.stringify({sets,curSetId}));}catch(e){}
+  try{localStorage.setItem('pkr6sets',JSON.stringify({sets,curSetId,favorites}));}catch(e){}
 }
 function loadPersist(){
   try{
     const raw=localStorage.getItem('pkr6sets');
-    if(raw){const p=JSON.parse(raw);sets=p.sets||[];curSetId=p.curSetId||null;}
+    if(raw){const p=JSON.parse(raw);sets=p.sets||[];curSetId=p.curSetId||null;favorites=p.favorites||[];}
   }catch(e){}
   if(!sets.length){const id=genId();sets=[{id,name:'Default',data:{}}];curSetId=id;}
   if(!sets.find(s=>s.id===curSetId))curSetId=sets[0].id;
@@ -530,10 +533,32 @@ function renderNav(){
     const ch=document.createElement('span');ch.className='chev'+(og[g.id]?' o':'');ch.textContent='▶';
     const ico=document.createElement('span');ico.className='tico';ico.textContent=g.ico||'';
     const lb=document.createElement('span');lb.className='tlbl';lb.textContent=g.label;
+    /* star count badge for favorites */
+    if(g.id==='__favs__'){
+      const cnt=document.createElement('span');
+      cnt.style.cssText=`font-size:10px;color:${favorites.length?"#f5c518":"var(--di)"};font-family:'JetBrains Mono',monospace;margin-left:4px`;
+      cnt.textContent=favorites.length?String(favorites.length):'ยังไม่มี';
+      lb.appendChild(cnt);
+    }
     th.appendChild(ch);th.appendChild(ico);th.appendChild(lb);
     th.onclick=()=>{og[g.id]=!og[g.id];renderNav();};
     ge.appendChild(th);
     const tc=document.createElement('div');tc.className='tc'+(og[g.id]?' o':'');
+    /* dynamic favorites list */
+    if(g.id==='__favs__'){
+      if(favorites.length===0){
+        const empty=document.createElement('div');
+        empty.style.cssText="padding:6px 10px;font-size:11px;color:var(--di);font-family:'JetBrains Mono',monospace";
+        empty.textContent='กด ☆ ที่ spot ใดก็ได้';
+        tc.appendChild(empty);
+      } else {
+        favorites.forEach(fid=>{
+          const info=findInfo(fid);
+          if(info) tc.appendChild(mkSI({id:fid,label:info.s}));
+        });
+      }
+      ge.appendChild(tc);el.appendChild(ge);return;
+    }
     if(g.flat){g.flat.forEach(s=>tc.appendChild(mkSI(s)));}
     else if(g.subs){
       g.subs.forEach(sub=>{
@@ -557,14 +582,31 @@ function renderNav(){
 }
 
 function mkSI(s){
+  if(s.id==='__fav_placeholder__')return document.createElement('div');
   const el=document.createElement('div');
   const hd=hasData(s.id);
+  const isFav=favorites.includes(s.id);
   el.className='si'+(s.id===curSpot?' active':'')+(hd?' hd':'');
+  el.style.cssText=`display:flex;align-items:center;gap:5px;padding:5px 7px;border-radius:4px;cursor:pointer;font-size:12px;font-family:'JetBrains Mono',monospace;color:${s.id===curSpot?"var(--tx)":"var(--mu)"};transition:all .1s`;
   const dot=document.createElement('span');dot.className='sdot'+(hd?' f':'');
-  const lb=document.createElement('span');lb.textContent=s.label;
-  el.appendChild(dot);el.appendChild(lb);
+  const lb=document.createElement('span');lb.textContent=s.label;lb.style.flex='1';
+  const star=document.createElement('button');
+  star.textContent=isFav?'★':'☆';
+  star.title=isFav?'ยกเลิก Favorite':'เพิ่ม Favorite';
+  star.style.cssText='background:none;border:none;cursor:pointer;font-size:13px;color:'+(isFav?'#f5c518':'var(--di)')+';padding:0;line-height:1;flex-shrink:0;transition:color .15s';
+  star.onmouseenter=()=>{star.style.color='#f5c518';};
+  star.onmouseleave=()=>{star.style.color=isFav?'#f5c518':'var(--di)';};
+  star.onclick=(e)=>{e.stopPropagation();toggleFav(s.id);};
+  el.appendChild(dot);el.appendChild(lb);el.appendChild(star);
   el.onclick=()=>selSpot(s.id,s.label);
   return el;
+}
+
+function toggleFav(id){
+  const idx=favorites.indexOf(id);
+  if(idx>=0)favorites.splice(idx,1);
+  else favorites.push(id);
+  persist();renderNav();
 }
 
 function findInfo(id){
@@ -575,6 +617,7 @@ function findInfo(id){
 }
 
 function selSpot(id,label){
+  if(id==='__favs__')return; /* safety guard */
   curSpot=id;
   for(const g of TREE){
     if(g.flat&&g.flat.find(x=>x.id===id))og[g.id]=true;
