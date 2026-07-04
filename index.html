@@ -669,12 +669,17 @@ function svgCell(segs){
   const W=58,H=58;
   if(!segs||!segs.length)return'';
   if(segs.length===1)return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg"><rect width="${W}" height="${H}" fill="${segs[0].color}"/></svg>`;
-  const s0=segs[0],s1=segs[1],ratio=s0.pct/(s0.pct+s1.pct);
-  const x1=Math.min(W*ratio*2,W),y0=Math.min(H*ratio*2,H);
-  let p=`<polygon points="0,0 ${x1},0 0,${y0}" fill="${s0.color}"/>`;
-  p+=`<polygon points="${x1},0 ${W},0 ${W},${H} 0,${H} 0,${y0}" fill="${s1.color}"/>`;
-  if(segs.length>2){const ex=segs.slice(2),tot=ex.reduce((s,a)=>s+a.pct,0);let x=0;ex.forEach(sg=>{const w=(sg.pct/tot)*W;p+=`<rect x="${x}" y="${H-5}" width="${w}" height="5" fill="${sg.color}"/>`;x+=w;});}
-  return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${p}</svg>`;
+  /* vertical bars — each action gets width proportional to its % */
+  const total=segs.reduce((s,a)=>s+a.pct,0);
+  let rects='';let x=0;
+  segs.forEach(sg=>{
+    const w=Math.round((sg.pct/total)*W);
+    rects+=`<rect x="${x}" y="0" width="${w}" height="${H}" fill="${sg.color}"/>`;
+    x+=w;
+  });
+  /* fill any rounding gap with last color */
+  if(x<W)rects+=`<rect x="${x}" y="0" width="${W-x}" height="${H}" fill="${segs[segs.length-1].color}"/>`;
+  return`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg">${rects}</svg>`;
 }
 
 function getSegs(h){
