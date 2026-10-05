@@ -73,6 +73,8 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .fav-star{background:none;border:none;cursor:pointer;font-size:13px;padding:0;line-height:1;flex-shrink:0;transition:color .15s}
 .sdot.f{background:#25b07a}
 .nav-bot{padding:8px 6px;border-top:1px solid var(--bor);flex-shrink:0}
+.add-spot-btn{width:100%;margin-bottom:8px;padding:7px 9px;border:1px dashed var(--ac);border-radius:6px;background:rgba(76,139,245,.08);color:var(--ac);font:500 12px 'IBM Plex Sans Thai',sans-serif;cursor:pointer;transition:all .12s}
+.add-spot-btn:hover{background:rgba(76,139,245,.16);border-style:solid}
 .ql{font-size:9px;color:var(--di);font-family:'JetBrains Mono',monospace;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px}
 .qa{display:flex;align-items:center;gap:6px;padding:4px 6px;border-radius:4px;cursor:pointer;border:1px solid transparent;transition:all .1s}
 .qa:hover{background:var(--sur2)}
@@ -141,6 +143,8 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
 .name-modal{background:var(--sur);border:1px solid var(--bor);border-radius:10px;padding:20px;width:300px;max-width:95vw}
 .name-modal h3{font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:600;margin-bottom:12px}
 .name-input{width:100%;padding:7px 10px;font-size:13px;border-radius:6px;border:1px solid var(--bor);background:var(--sur2);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-serif;outline:none;margin-bottom:12px}
+.spot-del{background:none;border:none;color:var(--di);cursor:pointer;padding:0 2px;font-size:11px;line-height:1;flex-shrink:0}
+.spot-del:hover{color:#e05a5a}
 .name-input:focus{border-color:var(--ac)}
 
 /* GTO modal */
@@ -188,6 +192,7 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
   <div class="nav">
     <div class="nav-scroll" id="navTree"></div>
     <div class="nav-bot">
+      <button class="add-spot-btn" onclick="openSpotModal()">＋ เพิ่ม Spot ของฉัน</button>
       <div class="ql">Quick Paint</div>
       <div id="qal"></div>
     </div>
@@ -242,6 +247,18 @@ body{background:var(--bg);color:var(--tx);font-family:'IBM Plex Sans Thai',sans-
     <div class="mbtns">
       <button class="mb" onclick="closeNameModal()">ยกเลิก</button>
       <button class="mb p" id="nameConfirmBtn" onclick="confirmName()">สร้าง</button>
+    </div>
+  </div>
+</div>
+
+<!-- Add custom spot modal -->
+<div class="overlay" id="spotOverlay">
+  <div class="name-modal">
+    <h3>เพิ่ม Spot ของฉัน</h3>
+    <input class="name-input" id="spotInput" placeholder="เช่น BTN vs CO 3Bet" maxlength="50">
+    <div class="mbtns">
+      <button class="mb" onclick="closeSpotModal()">ยกเลิก</button>
+      <button class="mb p" onclick="addCustomSpot()">เพิ่ม Spot</button>
     </div>
   </div>
 </div>
@@ -395,6 +412,7 @@ const TREE=[
 /* ── STATE ── */
 let sets=[];        // [{id, name, data:{}}]
 let favorites=[];   // [spotId, ...]
+let customSpots=[]; // [{id, label}] — user-created spots shared by every set
 let curSetId=null;
 let curSpot=null, curAct='r', painting=false, didDrag=false;
 let mHand=null, mSpot=null, mVals={};
@@ -412,17 +430,44 @@ const hasData=(id)=>Object.keys(curData()).some(k=>k.startsWith(id+'|'));
 function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
 /* ── STORAGE ── */
+const STORAGE_KEY='pkr6sets';
+const DB_NAME='pkr6backup';
+const DB_STORE='state';
+let lastSavedAt=0;
+
+function snapshot(){return{version:2,sets,curSetId,favorites,customSpots,savedAt:Date.now()};}
 function persist(){
-  try{localStorage.setItem('pkr6sets',JSON.stringify({sets,curSetId,favorites}));}catch(e){}
+  const state=snapshot();lastSavedAt=state.savedAt;
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state));}catch(e){}
+  saveBackup(state);
+}
+function applyState(p){
+  if(!p||!Array.isArray(p.sets))return false;
+  sets=p.sets;curSetId=p.curSetId||null;favorites=Array.isArray(p.favorites)?p.favorites:[];
+  customSpots=Array.isArray(p.customSpots)?p.customSpots:[];lastSavedAt=Number(p.savedAt)||0;
+  return true;
 }
 function loadPersist(){
   try{
-    const raw=localStorage.getItem('pkr6sets');
-    if(raw){const p=JSON.parse(raw);sets=p.sets||[];curSetId=p.curSetId||null;favorites=p.favorites||[];}
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw)applyState(JSON.parse(raw));
   }catch(e){}
   if(!sets.length){const id=genId();sets=[{id,name:'Default',data:{}}];curSetId=id;}
   if(!sets.find(s=>s.id===curSetId))curSetId=sets[0].id;
 }
+function openDB(){
+  return new Promise((resolve,reject)=>{const q=indexedDB.open(DB_NAME,1);q.onupgradeneeded=()=>q.result.createObjectStore(DB_STORE);q.onsuccess=()=>resolve(q.result);q.onerror=()=>reject(q.error);});
+}
+async function saveBackup(state){
+  try{const db=await openDB();const tx=db.transaction(DB_STORE,'readwrite');tx.objectStore(DB_STORE).put(state,'latest');tx.oncomplete=()=>db.close();}catch(e){}
+}
+async function restoreBackup(){
+  try{
+    const db=await openDB();const tx=db.transaction(DB_STORE,'readonly');const q=tx.objectStore(DB_STORE).get('latest');
+    q.onsuccess=()=>{const p=q.result;db.close();if(p&&(!lastSavedAt||Number(p.savedAt)>lastSavedAt)&&applyState(p)){if(!sets.find(s=>s.id===curSetId))curSetId=sets[0]?.id||null;renderTabs();renderNav();renderGrid();updateBC();persist();ss('✓ กู้ข้อมูลสำรองแล้ว');}};
+  }catch(e){}
+}
+function requestDurableStorage(){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist();}catch(e){}}
 function ss(m){const el=document.getElementById('ss');el.textContent=m;setTimeout(()=>el.textContent='',1800);}
 
 /* ── TABS ── */
@@ -495,7 +540,7 @@ function confirmName(){
 
 /* ── EXPORT / IMPORT ── */
 function exportJSON(){
-  const blob=new Blob([JSON.stringify({sets},null,2)],{type:'application/json'});
+  const blob=new Blob([JSON.stringify(snapshot(),null,2)],{type:'application/json'});
   const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='poker-ranges.json';a.click();
 }
 function importJSON(){
@@ -506,7 +551,7 @@ function importJSON(){
     r.onload=ev=>{
       try{
         const p=JSON.parse(ev.target.result);
-        if(p.sets&&Array.isArray(p.sets)){sets=p.sets;curSetId=sets[0].id;}
+        if(p.sets&&Array.isArray(p.sets)){sets=p.sets;curSetId=p.curSetId||sets[0].id;favorites=p.favorites||[];customSpots=p.customSpots||[];}
         else if(typeof p==='object'&&!Array.isArray(p)){
           /* legacy single-set format */
           const id=genId();sets=[{id,name:'Imported',data:p}];curSetId=id;
@@ -579,9 +624,19 @@ function renderNav(){
     }
     ge.appendChild(tc);el.appendChild(ge);
   });
+  if(customSpots.length){
+    const ge=document.createElement('div');ge.className='tg';
+    const gid='__custom__';const th=document.createElement('div');th.className='th'+(og[gid]?' open':'');
+    const ch=document.createElement('span');ch.className='chev'+(og[gid]?' o':'');ch.textContent='▶';
+    const ico=document.createElement('span');ico.className='tico';ico.textContent='✦';
+    const lb=document.createElement('span');lb.className='tlbl';lb.textContent='My Spots';
+    th.appendChild(ch);th.appendChild(ico);th.appendChild(lb);th.onclick=()=>{og[gid]=!og[gid];renderNav();};ge.appendChild(th);
+    const tc=document.createElement('div');tc.className='tc'+(og[gid]?' o':'');customSpots.forEach(s=>tc.appendChild(mkSI(s,true)));
+    ge.appendChild(tc);el.appendChild(ge);
+  }
 }
 
-function mkSI(s){
+function mkSI(s,isCustom=false){
   if(s.id==='__fav_placeholder__')return document.createElement('div');
   const el=document.createElement('div');
   const hd=hasData(s.id);
@@ -598,6 +653,7 @@ function mkSI(s){
   star.onmouseleave=()=>{star.style.color=isFav?'#f5c518':'var(--di)';};
   star.onclick=(e)=>{e.stopPropagation();toggleFav(s.id);};
   el.appendChild(dot);el.appendChild(lb);el.appendChild(star);
+  if(isCustom){const del=document.createElement('button');del.className='spot-del';del.textContent='✕';del.title='ลบ Spot นี้';del.onclick=e=>{e.stopPropagation();deleteCustomSpot(s.id);};el.appendChild(del);}
   el.onclick=()=>selSpot(s.id,s.label);
   return el;
 }
@@ -610,6 +666,7 @@ function toggleFav(id){
 }
 
 function findInfo(id){
+  const custom=customSpots.find(x=>x.id===id);if(custom)return{g:'My Spots',sub:null,s:custom.label};
   for(const g of TREE){
     if(g.flat){const s=g.flat.find(x=>x.id===id);if(s)return{g:g.label,sub:null,s:s.label};}
     if(g.subs){for(const sub of g.subs){const s=sub.spots.find(x=>x.id===id);if(s)return{g:g.label,sub:sub.label,s:s.label};}}
@@ -623,6 +680,7 @@ function selSpot(id,label){
     if(g.flat&&g.flat.find(x=>x.id===id))og[g.id]=true;
     if(g.subs){for(const sub of g.subs){if(sub.spots.find(x=>x.id===id)){og[g.id]=true;os[g.id+'_'+sub.id]=true;}}}
   }
+  if(customSpots.some(x=>x.id===id))og.__custom__=true;
   renderNav();
   document.getElementById('wel').style.display='none';
   const rv=document.getElementById('rv');rv.style.display='flex';
@@ -630,6 +688,19 @@ function selSpot(id,label){
   document.getElementById('setBadge').textContent=sets.find(s=>s.id===curSetId)?.name||'';
   updateBC();renderGrid();updateStats();
   startAutoRNG();
+}
+
+function openSpotModal(){document.getElementById('spotInput').value='';document.getElementById('spotOverlay').classList.add('open');setTimeout(()=>document.getElementById('spotInput').focus(),50);}
+function closeSpotModal(){document.getElementById('spotOverlay').classList.remove('open');}
+function addCustomSpot(){
+  const label=document.getElementById('spotInput').value.trim();if(!label)return;
+  const spot={id:'custom_'+genId(),label};customSpots.push(spot);og.__custom__=true;closeSpotModal();persist();renderNav();selSpot(spot.id,spot.label);ss('✓ เพิ่ม Spot แล้ว');
+}
+function deleteCustomSpot(id){
+  const spot=customSpots.find(x=>x.id===id);if(!spot||!confirm('ลบ Spot “'+spot.label+'” และข้อมูลของ Spot นี้ทุก Set?'))return;
+  customSpots=customSpots.filter(x=>x.id!==id);favorites=favorites.filter(x=>x!==id);sets.forEach(set=>Object.keys(set.data||{}).forEach(k=>{if(k.startsWith(id+'|'))delete set.data[k];}));
+  if(curSpot===id){curSpot=null;document.getElementById('wel').style.display='';document.getElementById('rv').style.display='none';stopAutoRNG();}
+  persist();renderNav();updateBC();ss('✓ ลบ Spot แล้ว');
 }
 
 function updateBC(){
@@ -937,13 +1008,15 @@ function doSpin(){
 /* ── EVENTS ── */
 document.getElementById('overlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('overlay'))closeModal();});
 document.getElementById('nameOverlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('nameOverlay'))closeNameModal();});
+document.getElementById('spotOverlay').addEventListener('mousedown',e=>{if(e.target===document.getElementById('spotOverlay'))closeSpotModal();});
 document.getElementById('go').addEventListener('mousedown',e=>{if(e.target===document.getElementById('go'))closeGTO();});
 document.getElementById('nameInput').addEventListener('keydown',e=>{if(e.key==='Enter')confirmName();});
+document.getElementById('spotInput').addEventListener('keydown',e=>{if(e.key==='Enter')addCustomSpot();});
 document.addEventListener('mouseup',()=>{painting=false;didDrag=false;});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();closeGTO();closeNameModal();}});
 
 /* ── INIT ── */
-loadPersist();renderTabs();renderNav();renderQA();renderLeg();renderHdrs();
+loadPersist();renderTabs();renderNav();renderQA();renderLeg();renderHdrs();restoreBackup();requestDurableStorage();
 </script>
 </body>
 </html>
