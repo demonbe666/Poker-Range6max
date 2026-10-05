@@ -582,7 +582,7 @@ function renderNav(){
   const el=document.getElementById('navTree');el.innerHTML='';
   const query=favoriteQuery.trim().toLocaleLowerCase();
   if(query){
-    const matches=favorites.map(id=>({id,info:findInfo(id)})).filter(x=>x.info&&[x.info.g,x.info.sub,x.info.s].filter(Boolean).join(' ').toLocaleLowerCase().includes(query));
+    const matches=favorites.map(id=>({id,info:findInfo(id)})).filter(x=>x.info&&x.info.s.trim().toLocaleLowerCase().startsWith(query));
     const title=document.createElement('div');title.style.cssText="padding:5px 8px 8px;font-size:11px;color:var(--mu);font-family:'JetBrains Mono',monospace";
     title.textContent='Favorites ที่ตรงกัน '+matches.length+' รายการ';el.appendChild(title);
     if(!matches.length){const empty=document.createElement('div');empty.style.cssText='padding:10px 8px;font-size:12px;color:var(--di);line-height:1.5';empty.textContent=favorites.length?'ไม่พบ Favorites ที่ตรงกับ “'+favoriteQuery.trim()+'”':'ยังไม่มี Spot ที่ติดดาว';el.appendChild(empty);return;}
